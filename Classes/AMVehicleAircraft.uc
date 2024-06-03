@@ -13,6 +13,10 @@ var(Aerodynamics) float TorqueScaler;
 var(Aerodynamics) float ForceScaler;
 var(Aerodynamics) array<AeroSurfaceComponent> AeroSurfaceComponents;
 
+var(Aerodynamics) float PitchControlSensitivity;
+var(Aerodynamics) float RollControlSensitivity;
+var(Aerodynamics) float YawControlSensitivity;
+
 var(AerodynamicsDebug) float MaxForce;
 var(AerodynamicsDebug) float MaxTorque;
 
@@ -86,6 +90,7 @@ simulated function PostBeginPlay()
     super.PostBeginPlay();
 
     MyMass = Mesh.GetRootBodyInstance().GetBodyMass();
+    `log("MyMass = " $ MyMass);
     // MyMass = 10000; // TODO: Temp.
 
     // Mesh.WakeRigidBody();
@@ -248,7 +253,7 @@ simulated function HandleInputs()
     Yaw = FClamp(InputYaw, -1, 1);
     Flap = 0;
 
-    CollectivePitch = EvalInterpCurveFloat(CollectivePitchCurve,KeyUp);
+    CollectivePitch = EvalInterpCurveFloat(CollectivePitchCurve, KeyUp);
     ThrustPercent = CollectivePitch;
 
     SetControlSurfaceAngles(Pitch, Roll, Yaw, Flap);
@@ -288,17 +293,17 @@ simulated function SetControlSurfaceAngles(float Pitch, float Roll, float Yaw, f
             switch (AeroComp.InputType)
             {
                 case EIT_Pitch:
-                    Value = Pitch * AeroComp.InputMultiplier;
+                    Value = Pitch * AeroComp.InputMultiplier * PitchControlSensitivity;
                     AeroComp.SetFlapAngle(Value);
                     SetFlapSkelControlStrength(AeroComp, Value);
                     break;
                 case EIT_Roll:
-                    Value = Roll * AeroComp.InputMultiplier;
+                    Value = Roll * AeroComp.InputMultiplier * RollControlSensitivity;
                     AeroComp.SetFlapAngle(Value);
                     SetFlapSkelControlStrength(AeroComp, Value);
                     break;
                 case EIT_Yaw:
-                    Value = Yaw * AeroComp.InputMultiplier;
+                    Value = Yaw * AeroComp.InputMultiplier * YawControlSensitivity;
                     AeroComp.SetFlapAngle(Value);
                     SetFlapSkelControlStrength(AeroComp, Value * 1);
                     break;
@@ -320,15 +325,17 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
 {
     local vector ForceThisFrame;
     local vector TorqueThisFrame;
-    local vector PredictedVelocity;
-    local vector PredictedAngularVelocity;
-    local vector PredictedForce;
-    local vector PredictedTorque;
+    // local vector PredictedVelocity;
+    // local vector PredictedAngularVelocity;
+    // local vector PredictedForce;
+    // local vector PredictedTorque;
+    local vector UnrealWorldVelocity;
+    local vector UnrealWorldAngularVelocity;
     local vector ForwardVec;
     local vector ThrustForce;
     // local vector Gravity;
     local vector COMLocation;
-    local vector X, Y, Z;
+    local vector Y, Z;
     // local matrix RotMatrix;
 
     local vector CurrentTorque;
@@ -337,10 +344,13 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     // TODO: temporary.
     if (Driver != None)
     {
-        COMLocation = Location + COMOffset;
+        // COMLocation = Location + COMOffset;
+        COMLocation = Mesh.GetRootBodyInstance().GetCenterOfMassPosition();
 
         // RotMatrix = MakeRotationMatrix(Rotation);
         // ForwardVec = Normal(MatrixGetAxis(RotMatrix, AXIS_X));
+
+        UnrealWorldVelocity = Mesh.GetRootBodyInstance().GetUnrealWorldVelocity();
         GetAxes(Rotation, ForwardVec, Y, Z);
 
         ThrustForce = ForwardVec * Thrust * ThrustPercent;
@@ -349,12 +359,12 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
 
         DrawDebugSphere(COMLocation, 32, 32, 130, 255, 85);
 
-        CalculateAerodynamicForces(Mesh.GetRootBodyInstance().GetUnrealWorldVelocity() /** 0.01*/,
-            Mesh.GetRootBodyInstance().GetUnrealWorldAngularVelocity(),
+        UnrealWorldAngularVelocity = Mesh.GetRootBodyInstance().GetUnrealWorldAngularVelocity();
+        CalculateAerodynamicForces( /** 0.01*/UnrealWorldVelocity, UnrealWorldAngularVelocity,
             /*Vect(0, 0, 0),*/ 1.2f, COMLocation, ForceThisFrame, TorqueThisFrame);
 
-        `log("UnrealWorldVelocity        = " $ Mesh.GetRootBodyInstance().GetUnrealWorldVelocity(),, 'AircraftPhysics');
-        `log("UnrealWorldAngularVelocity = " $ Mesh.GetRootBodyInstance().GetUnrealWorldAngularVelocity(),, 'AircraftPhysics');
+        `log("UnrealWorldVelocity        = " $ UnrealWorldVelocity,, 'AircraftPhysics');
+        `log("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity,, 'AircraftPhysics');
 
         // `log("********************************************************************************************",, 'AircraftPhysics');
         // `log("InverseTransformVector(RotMatrix, Velocity) = " $ InverseTransformVector(RotMatrix, Velocity),, 'AircraftPhysics');
@@ -365,6 +375,7 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
 
         // TODO: see if this can be done in UE3 reliably.
         // PredictedVelocity = PredictVelocity2(ThrustForce, DeltaTime);
+        // PredictedVelocity = PredictVelocity(ForceThisFrame + ThrustForce + Gravity * MyMass);
         // PredictedAngularVelocity = PredictAngularVelocity(TorqueThisFrame);
         // PredictedAngularVelocity = vect(0, 0, 0);
 
@@ -374,8 +385,8 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
         CurrentForce = (DeltaTime * (ForceThisFrame / MyMass));
         CurrentTorque = (DeltaTime * (TorqueThisFrame / MyMass));
 
-        // CurrentForce = (ForceThisFrame + PredictedForce) * 0.5;
-        // CurrentTorque = (TorqueThisFrame + PredictedTorque) * 0.5;
+        // CurrentForce = DeltaTime * (((ForceThisFrame + PredictedForce) * 0.5) / MyMass);
+        // CurrentTorque = DeltaTime * (((TorqueThisFrame + PredictedTorque) * 0.5) / MyMass);
 
         // CurrentForce = ForceThisFrame;
         // CurrentTorque = TorqueThisFrame;
@@ -410,8 +421,8 @@ simulated function CalculateAerodynamicForces(vector CurrentVelocity, vector Cur
     // local vector Force;
     // local vector Torque;
 
-    local rotator SocketRot;
-    local vector Vec;
+    // local rotator SocketRot;
+    // local vector Vec;
 
     OutForce.X = 0;
     OutForce.Y = 0;
@@ -423,7 +434,7 @@ simulated function CalculateAerodynamicForces(vector CurrentVelocity, vector Cur
     ForEach AeroSurfaceComponents(AeroComp)
     {
         RelativePos = AeroComp.GetPosition() - CenterOfMass;
-        Mesh.GetSocketWorldLocationAndRotation(AeroComp.AttachmentTargetName, Vec, SocketRot);
+        // Mesh.GetSocketWorldLocationAndRotation(AeroComp.AttachmentTargetName, Vec, SocketRot);
 
         // `log(AeroComp $ ": RelativePos = " $ RelativePos,, 'AircraftPhysics');
         // `log(name $ ": GetRotation() = " $ AeroComp.GetRotation(),, 'AircraftPhysics');
@@ -457,6 +468,7 @@ simulated function vector PredictAngularVelocity(vector Torque)
     local Quat InertiaTensorWorldRotation;
     local vector TorqueInDiagonalSpace;
     local vector AngularVelocityChangeInDiagonalSpace;
+    local vector UnrealAngularVelocity;
 
     if (IsZero(Torque))
     {
@@ -482,7 +494,8 @@ simulated function vector PredictAngularVelocity(vector Torque)
     AngularVelocityChangeInDiagonalSpace.Y = TorqueInDiagonalSpace.Y / 0.5; // / InertiaTensor.Y;
     AngularVelocityChangeInDiagonalSpace.Z = TorqueInDiagonalSpace.Z / 0.5; // / InertiaTensor.Z;
 
-    return (AngularVelocity + WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep
+    UnrealAngularVelocity = Mesh.GetRootBodyInstance().GetUnrealWorldAngularVelocity();
+    return (UnrealAngularVelocity + WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep
         * PREDICTION_TIMESTEP_FRACTION * QuatRotateVector(
             InertiaTensorWorldRotation, AngularVelocityChangeInDiagonalSpace));
 }
@@ -599,6 +612,10 @@ DefaultProperties
 
     CustomGravityFactor=1.00
 
-    MaxForce=3500000 // 250000 // 25000
-    MaxTorque=3500000 // 250000 // 25000
+    MaxForce=50000000 // 250000 // 25000
+    MaxTorque=5000000 // 250000 // 25000
+
+    PitchControlSensitivity=0.5
+    RollControlSensitivity=0.5
+    YawControlSensitivity=0.5
 }

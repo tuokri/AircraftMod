@@ -66,10 +66,10 @@ simulated function Tick(float DeltaTime)
         DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedLiftDirection) * 100, 8, 8, 255, 0, 0);
 
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 204, 0, 255); // Magenta?
-        DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 8, 8, 255, 0, 0);
+        DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 8, 8, 204, 0, 255);
 
-        DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedAirVelocity) * 100, 0, 0, 255); // Blue
-        DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedAirVelocity) * 100, 8, 8, 0, 0, 255);
+        DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 0, 0, 255); // Blue
+        DrawDebugSphere(AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 8, 8, 0, 0, 255);
 
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
         DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
@@ -921,5 +921,5 @@ DefaultProperties
     // CanopyTopRightParamName=LoachFrontTopRight
 
     // Newtons??
-    Thrust=2000//3000
+    Thrust=3000 // 2000
 }

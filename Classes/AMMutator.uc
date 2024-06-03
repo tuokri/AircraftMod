@@ -8,4 +8,6 @@ function PreBeginPlay()
     `log("mutator init");
 
     ROGameInfo(WorldInfo.Game).PlayerControllerClass = class'AMPlayerController';
+
+    WorldInfo.PhysicsProperties.CompartmentRigidBody.bFixedTimeStep = true;
 }

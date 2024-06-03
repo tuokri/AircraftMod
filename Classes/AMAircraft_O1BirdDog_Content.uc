@@ -315,37 +315,37 @@ DefaultProperties
     End Object
     */
 
-    Begin Object Class=AeroSurfaceComponent name=FuselageSurface01
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=0
-        StallAngleLow=0
-        Chord=3.04//152.0//3.04
-        FlapFraction=0
-        Span=1.23//61.5//1.23
-        AspectRatio=0.40460527
-        bIsControlSurface=False
-        InputType=EIT_None
-        AttachmentTargetName=Fuselage01
-        bAttachToSocket=True
-    End Object
+    // Begin Object Class=AeroSurfaceComponent name=FuselageSurface01
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=0
+    //     StallAngleLow=0
+    //     Chord=3.04//152.0//3.04
+    //     FlapFraction=0
+    //     Span=1.23//61.5//1.23
+    //     AspectRatio=0.40460527
+    //     bIsControlSurface=False
+    //     InputType=EIT_None
+    //     AttachmentTargetName=Fuselage01
+    //     bAttachToSocket=True
+    // End Object
 
-    Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=0
-        StallAngleLow=0
-        Chord=3.04//152.0//3.04
-        FlapFraction=0
-        Span=0.85//42.5//0.85
-        AspectRatio=0.27960527
-        bIsControlSurface=False
-        InputType=EIT_None
-        AttachmentTargetName=Fuselage02
-        bAttachToSocket=True
-    End Object
+    // Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=0
+    //     StallAngleLow=0
+    //     Chord=3.04//152.0//3.04
+    //     FlapFraction=0
+    //     Span=0.85//42.5//0.85
+    //     AspectRatio=0.27960527
+    //     bIsControlSurface=False
+    //     InputType=EIT_None
+    //     AttachmentTargetName=Fuselage02
+    //     bAttachToSocket=True
+    // End Object
 
     Begin Object Class=AeroSurfaceComponent name=ElevatorSurfaceLeft
         LiftSlope=6.28
@@ -452,35 +452,40 @@ DefaultProperties
         bAttachToSocket=True
     End Object
 
-    /*
-    Begin Object Class=AeroSurfaceComponent name=RudderSurface
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=15
-        StallAngleLow=-15
-        Chord=0.92//46.0//0.92
-        FlapFraction=0.4
-        Span=1.47//73.5//1.47
-        AspectRatio=1.5978261
-        bIsControlSurface=True
-        InputType=EIT_Yaw
-        AttachmentTargetName=Rudder
-        bAttachToSocket=True
-        FlapSkelControllerNameUp=Rudder_Right
-        FlapSkelControllerNameDown=Rudder_Left
-    End Object
-    */
+    // Begin Object Class=AeroSurfaceComponent name=RudderSurface
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=15
+    //     StallAngleLow=-15
+    //     Chord=0.92//46.0//0.92
+    //     FlapFraction=0.4
+    //     Span=1.47//73.5//1.47
+    //     AspectRatio=1.5978261
+    //     bIsControlSurface=True
+    //     InputType=EIT_Yaw
+    //     AttachmentTargetName=Rudder
+    //     bAttachToSocket=True
+    //     FlapSkelControllerNameUp=Rudder_Right
+    //     FlapSkelControllerNameDown=Rudder_Left
+    // End Object
 
     // AeroSurfaceComponents(0)=FuselageSurface01
     // AeroSurfaceComponents(1)=FuselageSurface02
-    AeroSurfaceComponents(1)=ElevatorSurfaceLeft
-    AeroSurfaceComponents(2)=ElevatorSurfaceRight
-    AeroSurfaceComponents(3)=AileronSurfaceLeft
-    AeroSurfaceComponents(4)=AileronSurfaceRight
-    AeroSurfaceComponents(5)=WingSurfaceRight
-    AeroSurfaceComponents(6)=WingSurfaceLeft
+    // AeroSurfaceComponents(2)=ElevatorSurfaceLeft
+    // AeroSurfaceComponents(3)=ElevatorSurfaceRight
+    // AeroSurfaceComponents(4)=AileronSurfaceLeft
+    // AeroSurfaceComponents(5)=AileronSurfaceRight
+    // AeroSurfaceComponents(6)=WingSurfaceRight
+    // AeroSurfaceComponents(7)=WingSurfaceLeft
     // AeroSurfaceComponents(8)=RudderSurface
+
+    AeroSurfaceComponents(0)=ElevatorSurfaceLeft
+    AeroSurfaceComponents(1)=ElevatorSurfaceRight
+    AeroSurfaceComponents(2)=AileronSurfaceLeft
+    AeroSurfaceComponents(3)=AileronSurfaceRight
+    AeroSurfaceComponents(4)=WingSurfaceRight
+    AeroSurfaceComponents(5)=WingSurfaceLeft
 
     /*
     RotorMeshAttachments(0)=(AttachmentName=MainRotorComponent0,Component=MainRotorAttachment0,BlurredComponent=MainRotorBlurAttachment0,DestroyedMesh=StaticMesh'VH_VN_US_OH6.Mesh.MainBlade_Stub01',AttachmentTargetName=Blade_01,bMainRotor=true, HitZoneIndex=MAINROTORBLADE1)
