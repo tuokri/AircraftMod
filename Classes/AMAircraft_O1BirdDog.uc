@@ -54,8 +54,6 @@ simulated function Tick(float DeltaTime)
 {
     local AeroSurfaceComponent AeroComp;
 
-    super.Tick(DeltaTime);
-
     DrawDebugLine(Location, Location + Velocity, 255, 255, 0); // Yellow
     DrawDebugSphere(Location + Velocity, 8, 8, 255, 255, 0);
 
@@ -76,6 +74,8 @@ simulated function Tick(float DeltaTime)
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
         DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
     }
+
+    super.Tick(DeltaTime);
 }
 
 /*
@@ -560,15 +560,44 @@ DefaultProperties
     Seats(0)={( CameraTag=ThirdPersonCamera,
                 CameraOffset=-420,
                 SeatAnimBlendName=PilotPositionNode,
-                SeatPositions=((bDriverVisible=true,bAllowFocus=false,PositionCameraTag=ThirdPersonCamera,ViewFOV=0.0,bViewFromCameraTag=True,bDrawOverlays=true,
-                                    PositionIdleAnim=Pilot_Idle,DriverIdleAnim=Pilot_Idle,AlternateIdleAnim=Pilot_Idle,SeatProxyIndex=0,
-                                    LeftHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCollective,DefaultEffectorRotationTargetName=IK_PilotCollective),
-                                    RightHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCyclic,DefaultEffectorRotationTargetName=IK_PilotCyclic),
-                                    LeftFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotLPedal,DefaultEffectorRotationTargetName=IK_PilotLPedal),
-                                    RightFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotRPedal,DefaultEffectorRotationTargetName=IK_PilotRPedal),
-                                    PositionFlinchAnims=(Pilot_Flinch),
-                                    PositionDeathAnims=(Pilot_Death))
-                                ),
+                SeatPositions=(
+                    (
+                        bDriverVisible=true,
+                        bAllowFocus=false,
+                        PositionCameraTag=ThirdPersonCamera,
+                        ViewFOV=0.0,
+                        bViewFromCameraTag=True,
+                        bDrawOverlays=true,
+                        PositionIdleAnim=Pilot_Idle,
+                        DriverIdleAnim=Pilot_Idle,
+                        AlternateIdleAnim=Pilot_Idle,
+                        SeatProxyIndex=0,
+                        LeftHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCollective,DefaultEffectorRotationTargetName=IK_PilotCollective),
+                        RightHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCyclic,DefaultEffectorRotationTargetName=IK_PilotCyclic),
+                        LeftFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotLPedal,DefaultEffectorRotationTargetName=IK_PilotLPedal),
+                        RightFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotRPedal,DefaultEffectorRotationTargetName=IK_PilotRPedal),
+                        PositionFlinchAnims=(Pilot_Flinch),
+                        PositionDeathAnims=(Pilot_Death)
+                    ),
+                    (
+                        bDriverVisible=true,
+                        bAllowFocus=false,
+                        PositionCameraTag=none,
+                        ViewFOV=0.0,
+                        bViewFromCameraTag=false,
+                        bDrawOverlays=true,
+                        PositionIdleAnim=Pilot_Idle,
+                        DriverIdleAnim=Pilot_Idle,
+                        AlternateIdleAnim=Pilot_Idle,
+                        SeatProxyIndex=0,
+                        LeftHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCollective,DefaultEffectorRotationTargetName=IK_PilotCollective),
+                        RightHandIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotCyclic,DefaultEffectorRotationTargetName=IK_PilotCyclic),
+                        LeftFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotLPedal,DefaultEffectorRotationTargetName=IK_PilotLPedal),
+                        RightFootIKInfo=(IKEnabled=false,DefaultEffectorLocationTargetName=IK_PilotRPedal,DefaultEffectorRotationTargetName=IK_PilotRPedal),
+                        PositionFlinchAnims=(Pilot_Flinch),
+                        PositionDeathAnims=(Pilot_Death)
+                    )
+                ),
                 bSeatVisible=true,
                 SeatBone=Pilot_Attach,
                 DriverDamageMult=0.5,

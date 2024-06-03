@@ -574,6 +574,16 @@ simulated function TakeImpactDamage(float ImpactForceMag)
     // Disabled for now.
 }
 
+simulated function BreakLeftSkid()
+{
+    // Disabled for now.
+}
+
+simulated function BreakRightSkid()
+{
+    // Disabled for now.
+}
+
 DefaultProperties
 {
     CollectivePitchCurve=(Points=((InVal=0.0,OutVal=0.0),(InVal=1.0,OutVal=1.0)))
@@ -589,6 +599,6 @@ DefaultProperties
 
     CustomGravityFactor=1.00
 
-    MaxForce=250000 // 25000
-    MaxTorque=250000 // 25000
+    MaxForce=3500000 // 250000 // 25000
+    MaxTorque=3500000 // 250000 // 25000
 }

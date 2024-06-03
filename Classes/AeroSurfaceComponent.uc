@@ -378,4 +378,7 @@ DefaultProperties
     bIsControlSurface=False
     InputType=EIT_None
     InputMultiplier=1
+
+    MaxTorque=3500000
+    MaxForce=3500000
 }

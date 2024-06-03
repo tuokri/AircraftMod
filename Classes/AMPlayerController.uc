@@ -1,6 +1,6 @@
 class AMPlayerController extends ROPlayerController;
 
-simulated exec function SpawnWilly()
+simulated exec function SpawnBirdDog()
 {
     SpawnVehicle("AircraftMod.AMAircraft_O1BirdDog_Content");
 }
