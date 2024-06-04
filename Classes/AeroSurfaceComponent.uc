@@ -27,16 +27,26 @@ var(AeroSurface) bool bAttachToSocket;
 var(AeroSurface) float InputMultiplier;
 var(AeroSurface) name FlapSkelControllerNameUp;
 var(AeroSurface) name FlapSkelControllerNameDown;
+var(AeroSurface) name SurfaceName;
 
 // DEBUG ONLY.
-var vector CachedDragDirection;
-var vector CachedLiftDirection;
-var vector CachedAirVelocity;
-var vector CachedForwardVector;
-var float MaxTorque;
-var float MaxForce;
+var(AeroSurfaceDebug) vector CachedDragDirection;
+var(AeroSurfaceDebug) vector CachedLiftDirection;
+var(AeroSurfaceDebug) vector CachedAirVelocity;
+var(AeroSurfaceDebug) vector CachedForwardVector;
+var(AeroSurfaceDebug) float MaxTorque;
+var(AeroSurfaceDebug) float MaxForce;
+var(AeroSurfaceDebug) vector CachedLift;
+var(AeroSurfaceDebug) vector CachedDrag;
+var(AeroSurfaceDebug) vector CachedTorque;
+var(AeroSurfaceDebug) vector CachedForce;
+var(AeroSurfaceDebug) float CachedLiftCoeff;
+var(AeroSurfaceDebug) float CachedDragCoeff;
+var(AeroSurfaceDebug) float CachedTangentialCoeff;
+var(AeroSurfaceDebug) float CachedDynamicPressure;
+var(AeroSurfaceDebug) bool bIsAtStall;
 
-var private float FlapAngle;
+var float FlapAngle;
 
 simulated function vector TransformDirection(matrix TM, vector Direction)
 {
@@ -164,37 +174,49 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
 
     Area = Chord * Span;
     DynamicPressure = 0.5 * AirDensity * VSizeSq((AirVelocity * 0.02)); // TODO: are things breaking due to meters/UUs conversions?
+    CachedDynamicPressure = DynamicPressure;
     LocalAngleOfAttack = ATan2(AirVelocity.Y, -AirVelocity.X);
 
     AerodynamicCoefficients = CalculateCoefficients(
         LocalAngleOfAttack, CorrectedLiftSlope,
         LocalZeroLiftAOA, LocalStallAngleHigh, LocalStallAngleLow);
 
+    CachedLiftCoeff = AerodynamicCoefficients.X;
+    CachedDragCoeff = AerodynamicCoefficients.Y;
+    CachedTangentialCoeff = AerodynamicCoefficients.Z;
+
     `log(
         name
         $ ": FlapAngle = " $ FlapAngle
         $ ", Area = " $ Area
-        $ ", LiftCoeff = " $ AerodynamicCoefficients.X
-        $ ", DragCoeff = " $ AerodynamicCoefficients.Y
-        $ ", TangentialCoeff = " $ AerodynamicCoefficients.Z
+        $ ", LiftCoeff = " $ CachedLiftCoeff
+        $ ", DragCoeff = " $ CachedDragCoeff
+        $ ", TangentialCoeff = " $ CachedTangentialCoeff
         $ ", DynamicPressure = " $ DynamicPressure,, 'AircraftPhysics');
 
     Lift = LiftDirection * AerodynamicCoefficients.X * DynamicPressure * Area;
     // Lift = ClampLength(Lift, MaxForce); // TODO: need for safety?
+    CachedLift = Lift;
+
     Drag = DragDirection * AerodynamicCoefficients.Y * DynamicPressure * Area;
     // Drag = ClampLength(Drag, MaxForce); // TODO: need for safety?
+    CachedDrag = Drag;
+
     Torque = (-ForwardVector * AerodynamicCoefficients.Z * DynamicPressure * Area * Chord);
     // Torque = ClampLength(Torque, MaxTorque); // TODO: need for safety?
 
     LocalForce = Lift + Drag;
     // LocalForce = ClampLength(LocalForce, MaxForce);
+    CachedForce = LocalForce;
 
     LocalTorque = (RelativePosition cross LocalForce) + Torque;
     // LocalTorque = ClampLength(LocalTorque, MaxTorque);
+    CachedTorque = LocalTorque;
 
     OutForce += LocalForce;
     OutTorque += LocalTorque;
 
+    bIsAtStall = !(LocalAngleOfAttack < LocalStallAngleHigh && LocalAngleOfAttack > LocalStallAngleLow);
     `log(
         name
         $ ": Lift = " $ Lift
@@ -204,7 +226,7 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
         $ ", AirVelocity = " $ AirVelocity
         $ ", WorldAirVelocity = " $ WorldAirVelocity
         $ ", RelativePosition = " $ RelativePosition
-        $ ", IsAtStall = " $ !(LocalAngleOfAttack < LocalStallAngleHigh && LocalAngleOfAttack > LocalStallAngleLow),, 'AircraftPhysics');
+        $ ", IsAtStall = " $ bIsAtStall,, 'AircraftPhysics');
 }
 
 simulated function vector CalculateCoefficients(float InAngleOfAttack, float CorrectedLiftSlope,

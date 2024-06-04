@@ -315,39 +315,40 @@ DefaultProperties
     End Object
     */
 
-    Begin Object Class=AeroSurfaceComponent name=FuselageSurface01
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=0
-        StallAngleLow=0
-        Chord=3.04//152.0//3.04
-        FlapFraction=0
-        Span=1.23//61.5//1.23
-        AspectRatio=0.40460527
-        bIsControlSurface=False
-        InputType=EIT_None
-        AttachmentTargetName=Fuselage01
-        bAttachToSocket=True
-    End Object
+    // Begin Object Class=AeroSurfaceComponent name=FuselageSurface01
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=0
+    //     StallAngleLow=0
+    //     Chord=3.04//152.0//3.04
+    //     FlapFraction=0
+    //     Span=1.23//61.5//1.23
+    //     AspectRatio=0.40460527
+    //     bIsControlSurface=False
+    //     InputType=EIT_None
+    //     AttachmentTargetName=Fuselage01
+    //     bAttachToSocket=True
+    // End Object
 
-    Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=0
-        StallAngleLow=0
-        Chord=3.04//152.0//3.04
-        FlapFraction=0
-        Span=0.85//42.5//0.85
-        AspectRatio=0.27960527
-        bIsControlSurface=False
-        InputType=EIT_None
-        AttachmentTargetName=Fuselage02
-        bAttachToSocket=True
-    End Object
+    // Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=0
+    //     StallAngleLow=0
+    //     Chord=3.04//152.0//3.04
+    //     FlapFraction=0
+    //     Span=0.85//42.5//0.85
+    //     AspectRatio=0.27960527
+    //     bIsControlSurface=False
+    //     InputType=EIT_None
+    //     AttachmentTargetName=Fuselage02
+    //     bAttachToSocket=True
+    // End Object
 
     Begin Object Class=AeroSurfaceComponent name=ElevatorSurfaceLeft
+        SurfaceName=ElevatorLeft
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-1.53
@@ -366,6 +367,7 @@ DefaultProperties
     End Object
 
     Begin Object Class=AeroSurfaceComponent name=ElevatorSurfaceRight
+        SurfaceName=ElevatorRight
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-1.53
@@ -384,14 +386,15 @@ DefaultProperties
     End Object
 
     Begin Object Class=AeroSurfaceComponent name=AileronSurfaceLeft
+        SurfaceName=AileronLeft
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.57//87.5//1.57
+        Chord=1.47//87.5//1.57
         FlapFraction=0.2
-        Span=2.1//105//2.1
+        Span=2.75//105//2.1
         AspectRatio=7
         bIsControlSurface=True
         InputType=EIT_Roll
@@ -403,14 +406,15 @@ DefaultProperties
     End Object
 
     Begin Object Class=AeroSurfaceComponent name=AileronSurfaceRight
+        SurfaceName=AileronRight
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.57//87.5//1.57
+        Chord=1.47//87.5//1.57
         FlapFraction=0.2
-        Span=2.1//105//2.1
+        Span=2.75//105//2.1
         AspectRatio=7
         bIsControlSurface=True
         InputType=EIT_Roll
@@ -421,6 +425,7 @@ DefaultProperties
     End Object
 
     Begin Object Class=AeroSurfaceComponent name=WingSurfaceLeft
+        SurfaceName=WingLeft
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-3
@@ -437,6 +442,7 @@ DefaultProperties
     End Object
 
     Begin Object Class=AeroSurfaceComponent name=WingSurfaceRight
+        SurfaceName=WingRight
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=-3
@@ -452,33 +458,33 @@ DefaultProperties
         bAttachToSocket=True
     End Object
 
-    Begin Object Class=AeroSurfaceComponent name=RudderSurface
-        LiftSlope=6.28
-        SkinFriction=0.02
-        ZeroLiftAOA=0
-        StallAngleHigh=15
-        StallAngleLow=-15
-        Chord=0.92//46.0//0.92
-        FlapFraction=0.4
-        Span=1.47//73.5//1.47
-        AspectRatio=1.5978261
-        bIsControlSurface=True
-        InputType=EIT_Yaw
-        AttachmentTargetName=Rudder
-        bAttachToSocket=True
-        FlapSkelControllerNameUp=Rudder_Right
-        FlapSkelControllerNameDown=Rudder_Left
-    End Object
+    // Begin Object Class=AeroSurfaceComponent name=RudderSurface
+    //     LiftSlope=6.28
+    //     SkinFriction=0.02
+    //     ZeroLiftAOA=0
+    //     StallAngleHigh=15
+    //     StallAngleLow=-15
+    //     Chord=0.92//46.0//0.92
+    //     FlapFraction=0.4
+    //     Span=1.47//73.5//1.47
+    //     AspectRatio=1.5978261
+    //     bIsControlSurface=True
+    //     InputType=EIT_Yaw
+    //     AttachmentTargetName=Rudder
+    //     bAttachToSocket=True
+    //     FlapSkelControllerNameUp=Rudder_Right
+    //     FlapSkelControllerNameDown=Rudder_Left
+    // End Object
 
-    AeroSurfaceComponents(0)=FuselageSurface01
-    AeroSurfaceComponents(1)=FuselageSurface02
-    AeroSurfaceComponents(2)=ElevatorSurfaceLeft
-    AeroSurfaceComponents(3)=ElevatorSurfaceRight
-    AeroSurfaceComponents(4)=AileronSurfaceLeft
-    AeroSurfaceComponents(5)=AileronSurfaceRight
-    AeroSurfaceComponents(6)=WingSurfaceRight
-    AeroSurfaceComponents(7)=WingSurfaceLeft
-    AeroSurfaceComponents(8)=RudderSurface
+    // AeroSurfaceComponents(0)=FuselageSurface01
+    // AeroSurfaceComponents(1)=FuselageSurface02
+    AeroSurfaceComponents(0)=ElevatorSurfaceLeft
+    AeroSurfaceComponents(1)=ElevatorSurfaceRight
+    AeroSurfaceComponents(2)=AileronSurfaceLeft
+    AeroSurfaceComponents(3)=AileronSurfaceRight
+    AeroSurfaceComponents(4)=WingSurfaceRight
+    AeroSurfaceComponents(5)=WingSurfaceLeft
+    // AeroSurfaceComponents(6)=RudderSurface
 
     // AeroSurfaceComponents(0)=ElevatorSurfaceLeft
     // AeroSurfaceComponents(1)=ElevatorSurfaceRight

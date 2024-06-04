@@ -19,6 +19,9 @@ var(Aerodynamics) float YawControlSensitivity;
 
 var(AerodynamicsDebug) float MaxForce;
 var(AerodynamicsDebug) float MaxTorque;
+var(AerodynamicsDebug) vector CachedThrustForce;
+var(AerodynamicsDebug) vector CachedForce;
+var(AerodynamicsDebug) vector CachedTorque;
 
 var float MyMass;
 var float ThrustPercent;
@@ -26,6 +29,29 @@ var float ThrustPercent;
 // var vector CurrentTorque;
 
 var(Aerodynamics) float CustomGravityFactor;
+
+// The font to draw the HUD with.
+var(AerodynamicsHUD) Font AeroHUDFont;
+// HUD background texture. Stretched to fit.
+var(AerodynamicsHUD) Texture2D AeroHUDBGTex;
+// HUD background border texture. Stretched to fit.
+var(AerodynamicsHUD) Texture2D AeroHUDBGBorder;
+// HUD background texture tint;
+var(AerodynamicsHUD) LinearColor AeroHUDBGTint;
+// HUD text color.
+var(AerodynamicsHUD) Color AeroHUDTextColor;
+// HUD text render settings.
+var(AerodynamicsHUD) FontRenderInfo AeroHUDFontRenderInfo;
+// Used to determine max HUD width. Only change if you know what you are doing.
+var(AerodynamicsHUD) private string SizeTestString;
+
+// Cached HUD drawing variables.
+var private int DrawIdx;
+var private int BGHeight;
+var private int BGWidth;
+var private int DrawRegionTopLeftX;
+var private int DrawRegionTopLeftY;
+var private vector2d TextSize;
 
 struct FlapSkelControlInfo
 {
@@ -147,9 +173,12 @@ simulated function PostBeginPlay()
 
 simulated event Tick(float DeltaTime)
 {
+    ROPlayerController(GetALocalPlayerController()).myHud.bShowOverlays = True;
+    ROPlayerController(GetALocalPlayerController()).myHud.AddPostRenderedActor(self);
+
     Super.Tick(DeltaTime);
 
-    Mesh.GetRootBodyInstance().CustomGravityFactor = CustomGravityFactor;
+    // Mesh.GetRootBodyInstance().CustomGravityFactor = CustomGravityFactor;
 
     if( bHasBeenDriven )
     {
@@ -191,6 +220,76 @@ simulated event Tick(float DeltaTime)
     HandleInputs();
 
     // `log("WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep = " $ WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep,, 'AircraftPhysics');
+}
+
+simulated event PostRenderFor(PlayerController PC, Canvas Canvas, vector CameraPosition, vector CameraDir)
+{
+    Canvas.Font = AeroHUDFont;
+    // TODO: maybe draw BG after the text so we can get the real width?
+    Canvas.TextSize(SizeTestString, TextSize.X, TextSize.Y);
+    // 8 lines of text per surface + 3 lines + a padding of 10.
+    BGHeight = (TextSize.Y * ((AeroSurfaceComponents.Length * 8) + 3)) + 10;
+    BGWidth = TextSize.X + 10;
+
+    DrawRegionTopLeftX = Canvas.SizeX - ((Canvas.SizeX / 7) + BGWidth);
+    DrawRegionTopLeftY = (Canvas.SizeY / 10);
+
+    Canvas.SetPos(DrawRegionTopLeftX, DrawRegionTopLeftY);
+    Canvas.DrawTileStretched(AeroHUDBGTex, BGWidth, BGHeight, 0, 0,
+        AeroHUDBGTex.SizeX, AeroHUDBGTex.SizeY, AeroHUDBGTint, True, True);
+    Canvas.DrawTileStretched(AeroHUDBGBorder, BGWidth, BGHeight, 0, 0,
+        AeroHUDBGBorder.SizeX, AeroHUDBGBorder.SizeY, AeroHUDBGTint, True, True);
+
+    Canvas.SetPos(Canvas.CurX + 5, Canvas.CurY + 5); // A bit of padding.
+    Canvas.SetDrawColorStruct(AeroHUDTextColor);
+
+    Canvas.DrawText("ThrustForce :" @ CachedThrustForce @ VSize(CachedThrustForce));
+    Canvas.DrawText("Force       :" @ CachedForce @ VSize(CachedForce));
+    Canvas.DrawText("Torque      :" @ CachedTorque @ VSize(CachedTorque));
+
+    for (DrawIdx = 0; DrawIdx < AeroSurfaceComponents.Length; ++DrawIdx)
+    {
+        Canvas.DrawText("-- Surface[" $ DrawIdx $ "]" @ AeroSurfaceComponents[DrawIdx].SurfaceName @ "--");
+        Canvas.DrawText("FlapAngle:" @ AeroSurfaceComponents[DrawIdx].FlapAngle);
+        Canvas.DrawText("Area     :" @ AeroSurfaceComponents[DrawIdx].Chord * AeroSurfaceComponents[DrawIdx].Span);
+        Canvas.DrawText("DynPres  :" @ AeroSurfaceComponents[DrawIdx].CachedDynamicPressure);
+        Canvas.DrawText("Drag     :" @ AeroSurfaceComponents[DrawIdx].CachedDrag);
+        Canvas.DrawText("Force    :" @ AeroSurfaceComponents[DrawIdx].CachedForce);
+        Canvas.DrawText("Torque   :" @ AeroSurfaceComponents[DrawIdx].CachedTorque);
+        Canvas.DrawText("Lift,Drag,Tang (coeffs):"
+            @ AeroSurfaceComponents[DrawIdx].CachedLiftCoeff
+            @ AeroSurfaceComponents[DrawIdx].CachedDragCoeff
+            @ AeroSurfaceComponents[DrawIdx].CachedTangentialCoeff
+        );
+    }
+
+    super.PostRenderFor(PC, Canvas, CameraPosition, CameraDir);
+}
+
+simulated function GetSVehicleDebug( out Array<String> DebugInfo )
+{
+    // local int i;
+
+    Super(SVehicle).GetSVehicleDebug(DebugInfo);
+
+    DebugInfo[DebugInfo.Length] = "-- AIRCRAFT DEBUG --";
+    DebugInfo[DebugInfo.Length] = "";
+
+    // for (i = 0; i < AeroSurfaceComponents.Length; ++i)
+    // {
+    //     DebugInfo[DebugInfo.Length] = "Surface " $ AeroSurfaceComponents[i].SurfaceName $ " [" $ i
+    //         $ "]: FlapAngle=" $ AeroSurfaceComponents[i].FlapAngle
+    //         $ "|Area=" $ AeroSurfaceComponents[i].Chord * AeroSurfaceComponents[i].Span
+    //         $ "|LiftCoe=" $ AeroSurfaceComponents[i].CachedLiftCoeff
+    //         $ "|DragCoe=" $ AeroSurfaceComponents[i].CachedDragCoeff
+    //         $ "|TangCoe=" $ AeroSurfaceComponents[i].CachedTangentialCoeff
+    //         $ "|DynPres=" $ AeroSurfaceComponents[i].CachedDynamicPressure;
+
+    //     DebugInfo[DebugInfo.Length] = "Lift=" $ AeroSurfaceComponents[i].CachedLift
+    //         $ "|Drag=" $ AeroSurfaceComponents[i].CachedDrag
+    //         $ "|Force=" $ AeroSurfaceComponents[i].CachedForce
+    //         $ "|Torque=" $ AeroSurfaceComponents[i].CachedTorque;
+    // }
 }
 
 simulated function HandleInputs()
@@ -354,6 +453,7 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
         GetAxes(Rotation, ForwardVec, Y, Z);
 
         ThrustForce = ForwardVec * Thrust * ThrustPercent;
+        CachedThrustForce = ThrustForce;
 
         // Gravity.Z = PhysicsVolume.GetGravityZ();
 
@@ -382,8 +482,11 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
         // CalculateAerodynamicForces(PredictedVelocity, PredictedAngularVelocity,
         //     /*Vect(0, 0, 0),*/ 1.2f, COMLocation, PredictedForce, PredictedTorque);
 
-        CurrentForce = (DeltaTime * (ForceThisFrame / MyMass));
-        CurrentTorque = (DeltaTime * (TorqueThisFrame / MyMass));
+        // CurrentForce = (DeltaTime * (ForceThisFrame / MyMass));
+        // CurrentTorque = (DeltaTime * (TorqueThisFrame / MyMass));
+
+        CurrentForce = (DeltaTime * (ForceThisFrame));
+        CurrentTorque = (DeltaTime * (TorqueThisFrame));
 
         // CurrentForce = DeltaTime * (((ForceThisFrame + PredictedForce) * 0.5) / MyMass);
         // CurrentTorque = DeltaTime * (((TorqueThisFrame + PredictedTorque) * 0.5) / MyMass);
@@ -397,6 +500,9 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
 
         // CurrentTorque = ClampLength(CurrentForce, PitchTorqueMax);
         // CurrentTorque = ClampLength(CurrentTorque, RollTorqueMax);
+
+        CachedForce = CurrentForce;
+        CachedTorque = CurrentTorque;
 
         `log("*********************************** DeltaTime " $ DeltaTime
             $ " ***********************************",, 'AircraftPhysics');
@@ -618,4 +724,15 @@ DefaultProperties
     PitchControlSensitivity=0.5
     RollControlSensitivity=0.5
     YawControlSensitivity=0.5
+
+    bPostRenderIfNotVisible=True
+
+    AeroHUDFont=Font'BirdDog.Font.DebugFont'
+    AeroHUDTextColor=(R=255, G=255, B=245, A=255)
+    AeroHUDFontRenderInfo=(bClipText=True, bEnableShadow=True)
+    AeroHUDBGTex=Texture2D'VN_UI_Textures.HUD.GameMode.UI_GM_Bar_Fill'
+    AeroHUDBGBorder=Texture2D'VN_UI_Textures.HUD.GameMode.UI_GM_Bar_Frame'
+    AeroHUDBGTint=(R=0.5,G=0.5,B=0.6,A=0.6)
+
+    SizeTestString="Surface [10] SurfaceNameX SomeValue=58348585.34858575"
 }
