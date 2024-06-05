@@ -28,6 +28,15 @@ const PREDICTION_TIMESTEP_FRACTION = 0.5f;
 
 var ROMapInfo ROMI;
 
+struct SurfaceDebugArrowAttachmentInfo
+{
+    var name AttachmentName;
+    var ROSkeletalMeshComponent ForwardArrowComponent;
+    var ROSkeletalMeshComponent LiftArrowComponent;
+    var ROSkeletalMeshComponent DragArrowComponent;
+    var name AttachmentSocketName;
+};
+
 // Thrust force (in Newtons)?
 var(Aerodynamics) float Thrust;
 // Scales torque affecting the aircraft. For debugging.
@@ -49,6 +58,12 @@ var(AerodynamicsDebug) bool bDrawDebugHUD;
 var(AerodynamicsDebug) vector TotalLift;
 var(AerodynamicsDebug) vector TotalDrag;
 var(AerodynamicsDebug) vector CachedCOMLocation;
+// 3 arrows for each surface. Forward arrow, lift arrow, drag arrow.
+var(AerodynamicsDebug) array<ROSkeletalMeshComponent> SurfaceDebugArrows;
+var(AerodynamicsDebug) array<SurfaceDebugArrowAttachmentInfo> SurfaceDebugArrowAttachments;
+var(AerodynamicsDebug) bool bDrawSurfaceForwardArrows;
+var(AerodynamicsDebug) bool bDrawSurfaceLiftArrows;
+var(AerodynamicsDebug) bool bDrawSurfaceDragArrows;
 
 var float MyMass;
 var float ThrustPercent;
@@ -835,4 +850,8 @@ DefaultProperties
     SizeTestStringShort="SomeValueHere: (588558,58784,5788) 0.8588455389849"
 
     bDrawDebugHUD=True
+
+    bDrawSurfaceForwardArrows=True
+    bDrawSurfaceLiftArrows=True
+    bDrawSurfaceDragArrows=True
 }

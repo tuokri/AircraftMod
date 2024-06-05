@@ -148,33 +148,33 @@ DefaultProperties
 
     // -------------- Exterior attachments ------------------//
 
-    Begin Object class=StaticMeshComponent name=ExtBodyAttachment0
-        StaticMesh=StaticMesh'VH_VN_US_OH6.Mesh.OH6_Fuselage_SM'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
-        LightEnvironment = MyLightEnvironment
-        CastShadow=true
-        DepthPriorityGroup=SDPG_Foreground
-        HiddenGame=true
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=FALSE
-    End Object
+    // Begin Object class=StaticMeshComponent name=ExtBodyAttachment0
+    //     StaticMesh=StaticMesh'VH_VN_US_OH6.Mesh.OH6_Fuselage_SM'
+    //     LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    //     LightEnvironment = MyLightEnvironment
+    //     CastShadow=true
+    //     DepthPriorityGroup=SDPG_Foreground
+    //     HiddenGame=true
+    //     CollideActors=false
+    //     BlockActors=false
+    //     BlockZeroExtent=false
+    //     BlockNonZeroExtent=false
+    //     bAcceptsDynamicDecals=FALSE
+    // End Object
 
-    Begin Object class=StaticMeshComponent name=ExtBodyAttachment1
-        StaticMesh=StaticMesh'VH_VN_US_OH6.Mesh.OH6_TailBoom_SM'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
-        LightEnvironment = MyLightEnvironment
-        CastShadow=true
-        DepthPriorityGroup=SDPG_Foreground
-        HiddenGame=true
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=FALSE
-    End Object
+    // Begin Object class=StaticMeshComponent name=ExtBodyAttachment1
+    //     StaticMesh=StaticMesh'VH_VN_US_OH6.Mesh.OH6_TailBoom_SM'
+    //     LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    //     LightEnvironment = MyLightEnvironment
+    //     CastShadow=true
+    //     DepthPriorityGroup=SDPG_Foreground
+    //     HiddenGame=true
+    //     CollideActors=false
+    //     BlockActors=false
+    //     BlockZeroExtent=false
+    //     BlockNonZeroExtent=false
+    //     bAcceptsDynamicDecals=FALSE
+    // End Object
 
     /*
     MeshAttachments(0)={(AttachmentName=ExtBodyComponent,Component=ExtBodyAttachment0,AttachmentTargetName=Fuselage)}
@@ -524,6 +524,58 @@ DefaultProperties
     // AeroSurfaceComponents(3)=AileronSurfaceRight
     // AeroSurfaceComponents(4)=WingSurfaceRight
     // AeroSurfaceComponents(5)=WingSurfaceLeft
+
+    // ------------------ Debug Arrow Attachments ------------------ //
+
+    Begin Object class=ROSkeletalMeshComponent name=ForwardArrow_ElevatorSurfaceLeft
+        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
+        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+        LightEnvironment=MyLightEnvironment
+        CastShadow=false
+        DepthPriorityGroup=SDPG_Foreground
+        HiddenGame=false
+        CollideActors=false
+        BlockActors=false
+        BlockZeroExtent=false
+        BlockNonZeroExtent=false
+        bAcceptsDynamicDecals=false
+    End Object
+
+    Begin Object class=ROSkeletalMeshComponent name=LiftArrow_ElevatorSurfaceLeft
+        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
+        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+        LightEnvironment=MyLightEnvironment
+        CastShadow=false
+        DepthPriorityGroup=SDPG_Foreground
+        HiddenGame=false
+        CollideActors=false
+        BlockActors=false
+        BlockZeroExtent=false
+        BlockNonZeroExtent=false
+        bAcceptsDynamicDecals=false
+    End Object
+
+    Begin Object class=ROSkeletalMeshComponent name=DragArrow_ElevatorSurfaceLeft
+        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
+        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+        LightEnvironment=MyLightEnvironment
+        CastShadow=false
+        DepthPriorityGroup=SDPG_Foreground
+        HiddenGame=false
+        CollideActors=false
+        BlockActors=false
+        BlockZeroExtent=false
+        BlockNonZeroExtent=false
+        bAcceptsDynamicDecals=false
+    End Object
+
+    SurfaceDebugArrowAttachments(0)={(
+        AttachmentName=DebugArrows_ElevatorSurfaceLeft,
+        ForwardArrowComponent=ForwardArrow_ElevatorSurfaceLeft,
+        LiftArrowComponent=LiftArrow_ElevatorSurfaceLeft,
+        DragArrowComponent=DragArrow_ElevatorSurfaceLeft,
+        AttachmentSocketName=L_Elevator
+    )}
 
     /*
     RotorMeshAttachments(0)=(AttachmentName=MainRotorComponent0,Component=MainRotorAttachment0,BlurredComponent=MainRotorBlurAttachment0,DestroyedMesh=StaticMesh'VH_VN_US_OH6.Mesh.MainBlade_Stub01',AttachmentTargetName=Blade_01,bMainRotor=true, HitZoneIndex=MAINROTORBLADE1)
