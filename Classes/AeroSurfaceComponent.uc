@@ -1,6 +1,7 @@
 class AeroSurfaceComponent extends PrimitiveComponent;
 
 const HALFPI = 1.57079632679;
+const UU_TO_METERS = 0.02;
 
 enum EInputType
 {
@@ -48,6 +49,7 @@ var(AeroSurfaceDebug) bool bIsAtStall;
 
 var float FlapAngle;
 
+/*
 simulated function vector TransformDirection(matrix TM, vector Direction)
 {
     return TransformVectorNoScale(TM, Direction);
@@ -80,6 +82,7 @@ simulated function Quat VectorQuaternionInverse(Quat Q)
     Q.Z = -Q.Z;
     return Q;
 }
+*/
 
 simulated function SetFlapAngle(float Angle)
 {
@@ -90,8 +93,12 @@ simulated function SetFlapAngle(float Angle)
     // `log(name $ ": FlapAngle (deg) = " $ FlapAngle * RadToDeg,, 'AircraftPhysics');
 }
 
-simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
-    vector RelativePosition, out vector OutForce, out vector OutTorque)
+simulated function CalculateForces(
+    vector WorldAirVelocity,
+    float AirDensity,
+    vector RelativePosition,
+    out vector OutForce,
+    out vector OutTorque)
 {
     // local matrix RotMatrix;
     local vector Lift;
@@ -120,13 +127,21 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
     local float DynamicPressure;
     local float LocalAngleOfAttack;
 
-    local vector X, Y, Z;
+    local vector Y, Z;
+    // local vector SocketLoc;
+    // local rotator SocketRot;
 
     // RotMatrix = MakeRotationMatrix(GetRotation());
     // ForwardVector = Normal(MatrixGetAxis(RotMatrix, AXIS_X));
 
-    GetAxes(GetRotation(), X, Y, Z);
-    ForwardVector = X;
+    // TODO: something is fucking this up? LifDirection goes from
+    // up to down suddenly for some reason?
+    GetAxes(GetRotation(), ForwardVector, Y, Z);
+    // GetAxes(Owner.Rotation, ForwardVector, Y, Z);
+
+    // AMVehicleAircraft(Owner).Mesh.GetSocketWorldLocationAndRotation(
+    //     AttachmentTargetName, SocketLoc, SocketRot);
+    // GetAxes(SocketRot, ForwardVector, Y, Z);
 
     // Accounting for aspect ratio effect on lift coefficient.
     CorrectedLiftSlope = (LiftSlope * AspectRatio
@@ -164,7 +179,12 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
     AirVelocity.Z = 0;
     DragDirection = TransformNormal(LocalToWorld /*RotMatrix*/, AirVelocity);
     // DragDirection = TransformVector(LocalToWorld, Normal(AirVelocity));
-    LiftDirection = DragDirection cross ForwardVector;
+    LiftDirection = Normal(DragDirection cross ForwardVector);
+    DragDirection = Normal(DragDirection);
+
+    // `log("###### LiftDirection SIZE :" @ VSize(LiftDirection));
+    // `log("###### DragDirection SIZE :" @ VSize(DragDirection));
+    // `log("###### AirVelocity SIZE   :" @ VSize(AirVelocity));
 
     // DEBUG ONLY.
     CachedAirVelocity = AirVelocity;
@@ -173,7 +193,8 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
     CachedForwardVector = ForwardVector;
 
     Area = Chord * Span;
-    DynamicPressure = 0.5 * AirDensity * VSizeSq((AirVelocity * 0.02)); // TODO: are things breaking due to meters/UUs conversions?
+    // TODO: are things breaking due to meters/UUs conversions?
+    DynamicPressure = 0.5 * AirDensity * VSizeSq((AirVelocity * UU_TO_METERS));
     CachedDynamicPressure = DynamicPressure;
     LocalAngleOfAttack = ATan2(AirVelocity.Y, -AirVelocity.X);
 
@@ -202,14 +223,16 @@ simulated function CalculateForces(vector WorldAirVelocity, float AirDensity,
     // Drag = ClampLength(Drag, MaxForce); // TODO: need for safety?
     CachedDrag = Drag;
 
-    Torque = (-ForwardVector * AerodynamicCoefficients.Z * DynamicPressure * Area * Chord);
+    // TODO: where to do the unit conversions for torque?
+    Torque = (-ForwardVector * AerodynamicCoefficients.Z * DynamicPressure * Area * Chord) * UU_TO_METERS;
     // Torque = ClampLength(Torque, MaxTorque); // TODO: need for safety?
 
     LocalForce = Lift + Drag;
     // LocalForce = ClampLength(LocalForce, MaxForce);
     CachedForce = LocalForce;
 
-    LocalTorque = (RelativePosition cross LocalForce) + Torque;
+    // TODO: where to do the unit conversions for torque?
+    LocalTorque = ((RelativePosition cross LocalForce) * UU_TO_METERS) + Torque;
     // LocalTorque = ClampLength(LocalTorque, MaxTorque);
     CachedTorque = LocalTorque;
 

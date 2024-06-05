@@ -330,6 +330,7 @@ DefaultProperties
     //     AttachmentTargetName=Fuselage01
     //     bAttachToSocket=True
     // End Object
+    // Components.Add(FuselageSurface01)
 
     // Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
     //     LiftSlope=6.28
@@ -346,6 +347,7 @@ DefaultProperties
     //     AttachmentTargetName=Fuselage02
     //     bAttachToSocket=True
     // End Object
+    // Components.Add(FuselageSurface02)
 
     Begin Object Class=AeroSurfaceComponent name=ElevatorSurfaceLeft
         SurfaceName=ElevatorLeft
@@ -354,9 +356,9 @@ DefaultProperties
         ZeroLiftAOA=-1.53
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1//50//1
+        Chord=1//50//1//50//1
         FlapFraction=0.4
-        Span=1.63//81.5//1.63
+        Span=1.63//81.5//1.63//81.5//1.63
         AspectRatio=1.63
         bIsControlSurface=True
         InputType=EIT_Pitch
@@ -365,6 +367,7 @@ DefaultProperties
         FlapSkelControllerNameUp=L_Elevator_Up
         FlapSkelControllerNameDown=L_Elevator_Down
     End Object
+    Components.Add(ElevatorSurfaceLeft)
 
     Begin Object Class=AeroSurfaceComponent name=ElevatorSurfaceRight
         SurfaceName=ElevatorRight
@@ -373,9 +376,9 @@ DefaultProperties
         ZeroLiftAOA=-1.53
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1//50//1
+        Chord=1//50//1//50//1
         FlapFraction=0.4
-        Span=1.63//81.5//1.63
+        Span=1.63//81.5//1.63//81.5//1.63
         AspectRatio=1.63
         bIsControlSurface=True
         InputType=EIT_Pitch
@@ -384,6 +387,7 @@ DefaultProperties
         FlapSkelControllerNameUp=R_Elevator_Up
         FlapSkelControllerNameDown=R_Elevator_Down
     End Object
+    Components.Add(ElevatorSurfaceRight)
 
     Begin Object Class=AeroSurfaceComponent name=AileronSurfaceLeft
         SurfaceName=AileronLeft
@@ -392,9 +396,9 @@ DefaultProperties
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.47//87.5//1.57
+        Chord=1.47//73.5//1.47//87.5//1.57
         FlapFraction=0.2
-        Span=2.75//105//2.1
+        Span=2.75//137.5//2.75//105//2.1
         AspectRatio=7
         bIsControlSurface=True
         InputType=EIT_Roll
@@ -404,6 +408,7 @@ DefaultProperties
         FlapSkelControllerNameUp=L_Aileron_Up
         FlapSkelControllerNameDown=L_Aileron_Down
     End Object
+    Components.Add(AileronSurfaceLeft)
 
     Begin Object Class=AeroSurfaceComponent name=AileronSurfaceRight
         SurfaceName=AileronRight
@@ -412,9 +417,9 @@ DefaultProperties
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.47//87.5//1.57
+        Chord=1.47//73.5//1.47//87.5//1.57
         FlapFraction=0.2
-        Span=2.75//105//2.1
+        Span=2.75//137.5//2.75//105//2.1
         AspectRatio=7
         bIsControlSurface=True
         InputType=EIT_Roll
@@ -423,6 +428,7 @@ DefaultProperties
         FlapSkelControllerNameUp=R_Aileron_Up
         FlapSkelControllerNameDown=R_Aileron_Down
     End Object
+    Components.Add(AileronSurfaceRight)
 
     Begin Object Class=AeroSurfaceComponent name=WingSurfaceLeft
         SurfaceName=WingLeft
@@ -431,15 +437,16 @@ DefaultProperties
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.57//87.5//1.57
+        Chord=1.57//78.5//1.57//87.5//1.57
         FlapFraction=0.2
-        Span=2.1//105//2.1
+        Span=2.1//105//2.1//105//2.1
         AspectRatio=7
         bIsControlSurface=False
         InputType=EIT_None
         AttachmentTargetName=R_Wing
         bAttachToSocket=True
     End Object
+    Components.Add(WingSurfaceLeft)
 
     Begin Object Class=AeroSurfaceComponent name=WingSurfaceRight
         SurfaceName=WingRight
@@ -448,15 +455,16 @@ DefaultProperties
         ZeroLiftAOA=-3
         StallAngleHigh=15
         StallAngleLow=-15
-        Chord=1.57//87.5//1.57
+        Chord=1.57//78.5//1.57//87.5//1.57
         FlapFraction=0.2
-        Span=2.1//105//2.1
+        Span=2.1//105//2.1//105//2.1
         AspectRatio=7
         bIsControlSurface=False
         InputType=EIT_None
         AttachmentTargetName=L_Wing
         bAttachToSocket=True
     End Object
+    Components.Add(WingSurfaceRight)
 
     // Begin Object Class=AeroSurfaceComponent name=RudderSurface
     //     LiftSlope=6.28
@@ -475,6 +483,7 @@ DefaultProperties
     //     FlapSkelControllerNameUp=Rudder_Right
     //     FlapSkelControllerNameDown=Rudder_Left
     // End Object
+    // Components.Add(RudderSurface)
 
     // AeroSurfaceComponents(0)=FuselageSurface01
     // AeroSurfaceComponents(1)=FuselageSurface02

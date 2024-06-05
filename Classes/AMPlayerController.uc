@@ -85,3 +85,32 @@ reliable server function ServerCamera(name NewMode)
         ClientMessage("CameraStyle=" $ PlayerCamera.CameraStyle);
     }
 }
+
+simulated exec function DrawAMDebugHUD(bool bDraw = True)
+{
+    local AMVehicleAircraft Aircraft;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        Aircraft.bDrawDebugHUD = bDraw;
+    }
+}
+
+simulated exec function SetAMScalers(float ForceScaler = 1.0, float TorqueScaler = 1.0)
+{
+    local AMVehicleAircraft Aircraft;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        Aircraft.ForceScaler = ForceScaler;
+        Aircraft.TorqueScaler = TorqueScaler;
+        ClientMessage(
+            Aircraft @ ": ForceScaler=" $ Aircraft.ForceScaler
+            @ "TorqueScaler=" $ Aircraft.TorqueScaler);
+    }
+}
+
+simulated exec function SetAMHUD(class<HUD> HUDType = class'AMHUD')
+{
+    ClientSetHud(HUDType);
+}

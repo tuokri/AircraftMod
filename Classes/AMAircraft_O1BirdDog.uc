@@ -57,9 +57,12 @@ simulated function Tick(float DeltaTime)
     DrawDebugLine(Location, Location + Velocity, 255, 255, 0); // Yellow
     DrawDebugSphere(Location + Velocity, 8, 8, 255, 255, 0);
 
+    DrawDebugLine(Location, Location + CachedForce, 30, 30, 255); // Blue
+    DrawDebugSphere(Location + CachedForce, 8, 8, 30, 30, 255);
+
     ForEach AeroSurfaceComponents(AeroComp)
     {
-        DrawDebugSphere(AeroComp.GetPosition(), 12, 12, 255, 10, 10);
+        // DrawDebugSphere(AeroComp.GetPosition(), 12, 12, 255, 10, 10);
         // DrawDebugSphere(AeroComp.GetPosition() - (Location + COMOffset), 10, 10, 255, 0, 255);
 
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedLiftDirection) * 100, 255, 0, 0); // Red
@@ -68,8 +71,8 @@ simulated function Tick(float DeltaTime)
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 204, 0, 255); // Magenta?
         DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 8, 8, 204, 0, 255);
 
-        DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 0, 0, 255); // Blue
-        DrawDebugSphere(AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 8, 8, 0, 0, 255);
+        // DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 0, 0, 255); // Blue
+        // DrawDebugSphere(AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 8, 8, 0, 0, 255);
 
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
         DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
