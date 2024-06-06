@@ -151,21 +151,17 @@ simulated function CalculateForces(
     local float DynamicPressure;
     local float LocalAngleOfAttack;
 
-    local vector Y, Z;
-    // local vector SocketLoc;
-    // local rotator SocketRot;
-
-    // RotMatrix = MakeRotationMatrix(GetRotation());
-    // ForwardVector = Normal(MatrixGetAxis(RotMatrix, AXIS_X));
+    local vector _Discard_Y, _Discard_Z;
 
     // TODO: something is fucking this up? LifDirection goes from
     // up to down suddenly for some reason?
-    GetAxes(GetRotation(), ForwardVector, Y, Z);
-    // GetAxes(Owner.Rotation, ForwardVector, Y, Z);
 
-    // AMVehicleAircraft(Owner).Mesh.GetSocketWorldLocationAndRotation(
-    //     AttachmentTargetName, SocketLoc, SocketRot);
-    // GetAxes(SocketRot, ForwardVector, Y, Z);
+    // TODO: some fuckery going on here in the original Unity project?
+    //  - The forward vector is not really forward but points to the left
+    //    on the reference Cessna aircraft? Why are the aero surfaces rotated 90 deg?
+    // GetAxes(GetRotation(), ForwardVector, Y, Z); <-- this should be correct according to all intuition!?
+    GetAxes(Owner.Rotation, _Discard_Y, ForwardVector, _Discard_Z); // <-- but let's do this instead...
+    ForwardVector = -ForwardVector; // Yeah...
 
     // Accounting for aspect ratio effect on lift coefficient.
     CorrectedLiftSlope = (LiftSlope * AspectRatio
@@ -193,16 +189,10 @@ simulated function CalculateForces(
     LocalStallAngleLow = LocalZeroLiftAOA + ClMaxLow / CorrectedLiftSlope;
 
     // Calculating air velocity relative to the surface's coordinate system.
-    // Z component of the velocity is discarded.
-    // TODO: Check if these vector/matrix operations are actually correct.
-    // TODO: copy UE4 InverseTransformDirection implementation.
-    // AirVelocity = InverseTransformDirection(LocalToWorld /*RotMatrix*/, WorldAirVelocity);
-    // AirVelocity = InverseTransformDirection(LocalToWorld /*RotMatrix*/, WorldAirVelocity);
-    // AirVelocity = InverseTransformVector(LocalToWorld, WorldAirVelocity);
     AirVelocity = InverseTransformNormal(LocalToWorld, WorldAirVelocity);
-    AirVelocity.Z = 0;
-    DragDirection = TransformNormal(LocalToWorld /*RotMatrix*/, AirVelocity);
-    // DragDirection = TransformVector(LocalToWorld, Normal(AirVelocity));
+    // Ignore the component perpendicular to surface since it only causes skin friction.
+    AirVelocity.Y = 0; // TODO: In unity the Z component is discarded? And in Unreal Y?
+    DragDirection = TransformNormal(LocalToWorld /*RotMatrix*/, Normal(AirVelocity));
     LiftDirection = Normal(DragDirection cross ForwardVector);
     DragDirection = Normal(DragDirection);
 
