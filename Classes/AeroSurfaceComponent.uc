@@ -220,14 +220,14 @@ simulated function CalculateForces(
     CachedDragCoeff = AerodynamicCoefficients.Y;
     CachedTangentialCoeff = AerodynamicCoefficients.Z;
 
-    `log(
-        name
-        $ ": FlapAngle = " $ FlapAngle
-        $ ", Area = " $ Area
-        $ ", LiftCoeff = " $ CachedLiftCoeff
-        $ ", DragCoeff = " $ CachedDragCoeff
-        $ ", TangentialCoeff = " $ CachedTangentialCoeff
-        $ ", DynamicPressure = " $ DynamicPressure,, 'AircraftPhysics');
+    // `log(
+    //     name
+    //     $ ": FlapAngle = " $ FlapAngle
+    //     $ ", Area = " $ Area
+    //     $ ", LiftCoeff = " $ CachedLiftCoeff
+    //     $ ", DragCoeff = " $ CachedDragCoeff
+    //     $ ", TangentialCoeff = " $ CachedTangentialCoeff
+    //     $ ", DynamicPressure = " $ DynamicPressure,, 'AircraftPhysics');
 
     Lift = LiftDirection * AerodynamicCoefficients.X * DynamicPressure * Area;
     // Lift = ClampLength(Lift, MaxForce); // TODO: need for safety?
@@ -254,16 +254,16 @@ simulated function CalculateForces(
     OutTorque += LocalTorque;
 
     bIsAtStall = !(LocalAngleOfAttack < LocalStallAngleHigh && LocalAngleOfAttack > LocalStallAngleLow);
-    `log(
-        name
-        $ ": Lift = " $ Lift
-        $ ", Drag = " $ Drag
-        $ ", Force = " $ LocalForce
-        $ ", Torque = " $ LocalTorque
-        $ ", AirVelocity = " $ AirVelocity
-        $ ", WorldAirVelocity = " $ WorldAirVelocity
-        $ ", RelativePosition = " $ RelativePosition
-        $ ", IsAtStall = " $ bIsAtStall,, 'AircraftPhysics');
+    // `log(
+    //     name
+    //     $ ": Lift = " $ Lift
+    //     $ ", Drag = " $ Drag
+    //     $ ", Force = " $ LocalForce
+    //     $ ", Torque = " $ LocalTorque
+    //     $ ", AirVelocity = " $ AirVelocity
+    //     $ ", WorldAirVelocity = " $ WorldAirVelocity
+    //     $ ", RelativePosition = " $ RelativePosition
+    //     $ ", IsAtStall = " $ bIsAtStall,, 'AircraftPhysics');
 }
 
 simulated function vector CalculateCoefficients(float InAngleOfAttack, float CorrectedLiftSlope,

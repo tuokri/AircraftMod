@@ -562,41 +562,20 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     CalculateAerodynamicForces(UnrealWorldVelocity, UnrealWorldAngularVelocity,
         /*Vect(0, 0, 0),*/ 1.2f, COMLocation, ForceThisFrame, TorqueThisFrame);
 
-    `log("UnrealWorldVelocity        = " $ UnrealWorldVelocity,, 'AircraftPhysics');
-    `log("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity,, 'AircraftPhysics');
+    // `log("UnrealWorldVelocity        = " $ UnrealWorldVelocity,, 'AircraftPhysics');
+    // `log("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity,, 'AircraftPhysics');
 
     PredictedVelocity = PredictVelocity2(ForceThisFrame + ThrustForce, DeltaTime);
+
+    // TODO: see if this can be done in UE3 reliably.
+    // PredictedAngularVelocity = PredictAngularVelocity(TorqueThisFrame);
 
     CalculateAerodynamicForces(PredictedVelocity, UnrealWorldAngularVelocity,
         /*Vect(0, 0, 0),*/ 1.2f, COMLocation, PredictedForce, PredictedTorque);
 
-    // `log("********************************************************************************************",, 'AircraftPhysics');
-    // `log("InverseTransformVector(RotMatrix, Velocity) = " $ InverseTransformVector(RotMatrix, Velocity),, 'AircraftPhysics');
-    // `log("Velocity << Rotation                        = " $ Velocity << Rotation,, 'AircraftPhysics');
-    // `log("Velocity                                    = " $ Velocity,, 'AircraftPhysics');
-    // `log("MyMass                                      = " $ MyMass,, 'AircraftPhysics');
-    // `log("********************************************************************************************",, 'AircraftPhysics');
-
-    // TODO: see if this can be done in UE3 reliably.
-
-    // PredictedVelocity = PredictVelocity(ForceThisFrame + ThrustForce + Gravity * MyMass);
-    // PredictedAngularVelocity = PredictAngularVelocity(TorqueThisFrame);
-    // PredictedAngularVelocity = vect(0, 0, 0);
-
-    // CalculateAerodynamicForces(PredictedVelocity, PredictedAngularVelocity,
-    //     /*Vect(0, 0, 0),*/ 1.2f, COMLocation, PredictedForce, PredictedTorque);
-
-    // CurrentForce = (DeltaTime * (ForceThisFrame / MyMass));
-    // CurrentTorque = (DeltaTime * (TorqueThisFrame / MyMass));
 
     CurrentForce = (DeltaTime * ((ForceThisFrame + PredictedForce) * 0.5));
     CurrentTorque = (DeltaTime * (TorqueThisFrame));
-
-    // CurrentForce = DeltaTime * (((ForceThisFrame + PredictedForce) * 0.5) / MyMass);
-    // CurrentTorque = DeltaTime * (((TorqueThisFrame + PredictedTorque) * 0.5) / MyMass);
-
-    // CurrentForce = ForceThisFrame;
-    // CurrentTorque = TorqueThisFrame;
 
     // TODO: temporary hacks.
     CurrentForce *= ForceScaler;
@@ -608,18 +587,15 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     CachedForce = CurrentForce;
     CachedTorque = CurrentTorque;
 
-    `log("*********************************** DeltaTime " $ DeltaTime
-        $ " ***********************************",, 'AircraftPhysics');
+    // `log("*********************************** DeltaTime " $ DeltaTime
+    //     $ " ***********************************",, 'AircraftPhysics');
 
     AddForce(CurrentForce + ThrustForce);
     AddTorque(CurrentTorque);
-    // AddForce(ThrustForce);
 
-    `log("CurrentForce  = " $ CurrentForce,, 'AircraftPhysics');
-    `log("CurrentTorque = " $ CurrentTorque,, 'AircraftPhysics');
-    `log("ThrustForce   = " $ ThrustForce,, 'AircraftPhysics');
-
-    // SetTimer(WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep, False, 'CalculateLiftTorqueThrust');
+    // `log("CurrentForce  = " $ CurrentForce,, 'AircraftPhysics');
+    // `log("CurrentTorque = " $ CurrentTorque,, 'AircraftPhysics');
+    // `log("ThrustForce   = " $ ThrustForce,, 'AircraftPhysics');
 }
 
 simulated function CalculateAerodynamicForces(

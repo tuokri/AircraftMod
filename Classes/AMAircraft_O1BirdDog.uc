@@ -98,8 +98,8 @@ simulated function Tick(float DeltaTime)
         DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 0, 0, 255); // Blue
         DrawDebugSphere(AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 8, 8, 0, 0, 255);
 
-        DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
-        DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
+        // DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
+        // DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
     }
 
     super.Tick(DeltaTime);
