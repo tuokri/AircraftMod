@@ -431,9 +431,7 @@ simulated function float TorqCoefficientProportion(float InEffectiveAngle)
 
 simulated function float FrictionAt90Degrees(float InFlapAngle)
 {
-    // return 1.98 * (4.26 * 10 ** -2) * FlapAngle * FlapAngle * (2.1 * 10 ** -1) * FlapAngle;
     return 1.98 - 0.0426 * InFlapAngle * InFlapAngle + 0.21 * InFlapAngle;
-    // return 0.01771308 * InFlapAngle * InFlapAngle * InFlapAngle;
 }
 
 DefaultProperties
