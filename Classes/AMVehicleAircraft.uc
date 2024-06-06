@@ -257,7 +257,7 @@ simulated event Tick(float DeltaTime)
     if( Health > 0 )
     {
         // CalculateLiftAndTorque(DeltaTime);
-        // UpdateAltitude();
+        UpdateAltitude();
         CalculateLiftTorqueThrust(DeltaTime);
     }
 
@@ -546,6 +546,10 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
 
     UnrealWorldVelocity = Mesh.GetRootBodyInstance().GetUnrealWorldVelocity();
     GetAxes(Rotation, ForwardVec, Y, Z);
+
+    // For HUD widgets.
+    CurrentPitch = Rotator(ForwardVec).Pitch;
+    CurrentRoll = Rotator(Y).Pitch;
 
     ThrustForce = ForwardVec * Thrust * ThrustPercent;
     CachedThrustForce = ThrustForce;
