@@ -35,6 +35,10 @@ struct SurfaceDebugArrowAttachmentInfo
     var ROSkeletalMeshComponent LiftArrowComponent;
     var ROSkeletalMeshComponent DragArrowComponent;
     var name AttachmentSocketName;
+    var AeroSurfaceComponent SurfaceComponent;
+    var MaterialInstanceConstant ForwardArrowMIC;
+    var MaterialInstanceConstant LiftArrowMIC;
+    var MaterialInstanceConstant DragArrowMIC;
 };
 
 // Thrust force (in Newtons)?
@@ -64,6 +68,19 @@ var(AerodynamicsDebug) array<SurfaceDebugArrowAttachmentInfo> SurfaceDebugArrowA
 var(AerodynamicsDebug) bool bDrawSurfaceForwardArrows;
 var(AerodynamicsDebug) bool bDrawSurfaceLiftArrows;
 var(AerodynamicsDebug) bool bDrawSurfaceDragArrows;
+var(AerodynamicsDebug) LinearColor ForwardDebugArrowColor;
+var(AerodynamicsDebug) LinearColor LiftDebugArrowColor;
+var(AerodynamicsDebug) LinearColor DragDebugArrowColor;
+var(AerodynamicsDebug) bool bDrawDebugTraces;
+
+var(AerodynamicsDebug) name TotalForceDebugArrowSocketName;
+var(AerodynamicsDebug) name VelocityDebugArrowSocketName;
+var(AerodynamicsDebug) ROSkeletalMeshComponent TotalForceDebugArrowComponent;
+var(AerodynamicsDebug) ROSkeletalMeshComponent VelocityDebugArrowComponent;
+var(AerodynamicsDebug) MaterialInstanceConstant TotalForceDebugArrowMIC;
+var(AerodynamicsDebug) MaterialInstanceConstant VelocityDebugArrowMIC;
+var(AerodynamicsDebug) LinearColor TotalForceDebugArrowColor;
+var(AerodynamicsDebug) LinearColor VelocityDebugArrowColor;
 
 var float MyMass;
 var float ThrustPercent;
@@ -154,6 +171,7 @@ function bool DriverEnter(Pawn P)
 
 simulated function PostBeginPlay()
 {
+    local int i;
     local AeroSurfaceComponent AeroComp;
     // local FlapSkelControlInfo FlapControlInfo;
 
@@ -213,10 +231,70 @@ simulated function PostBeginPlay()
         }
         */
     }
+
+    // TODO: debug only.
+    if (WorldInfo.NetMode != NM_DedicatedServer)
+    {
+        TotalForceDebugArrowComponent.SetAbsolute(false, true);
+        Mesh.AttachComponentToSocket(TotalForceDebugArrowComponent, TotalForceDebugArrowSocketName);
+        VelocityDebugArrowComponent.SetAbsolute(false, true);
+        Mesh.AttachComponentToSocket(VelocityDebugArrowComponent, VelocityDebugArrowSocketName);
+
+        TotalForceDebugArrowMIC = new class'MaterialInstanceConstant';
+        TotalForceDebugArrowMIC.SetParent(TotalForceDebugArrowComponent.GetMaterial(0));
+        TotalForceDebugArrowMIC.SetVectorParameterValue('Color', TotalForceDebugArrowColor);
+        TotalForceDebugArrowComponent.SetMaterial(0, TotalForceDebugArrowMIC);
+
+        VelocityDebugArrowMIC = new class'MaterialInstanceConstant';
+        VelocityDebugArrowMIC.SetParent(VelocityDebugArrowComponent.GetMaterial(0));
+        VelocityDebugArrowMIC.SetVectorParameterValue('Color', VelocityDebugArrowColor);
+        VelocityDebugArrowComponent.SetMaterial(0, VelocityDebugArrowMIC);
+
+        for (i = 0; i < SurfaceDebugArrowAttachments.Length; ++i)
+        {
+            SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetAbsolute(false, true);
+            Mesh.AttachComponentToSocket(
+                SurfaceDebugArrowAttachments[i].ForwardArrowComponent,
+                SurfaceDebugArrowAttachments[i].AttachmentSocketName
+            );
+            SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetAbsolute(false, true);
+            Mesh.AttachComponentToSocket(
+                SurfaceDebugArrowAttachments[i].LiftArrowComponent,
+                SurfaceDebugArrowAttachments[i].AttachmentSocketName
+            );
+            SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetAbsolute(false, true);
+            Mesh.AttachComponentToSocket(
+                SurfaceDebugArrowAttachments[i].DragArrowComponent,
+                SurfaceDebugArrowAttachments[i].AttachmentSocketName
+            );
+
+            SurfaceDebugArrowAttachments[i].ForwardArrowMIC = new class'MaterialInstanceConstant';
+            SurfaceDebugArrowAttachments[i].ForwardArrowMIC.SetParent(SurfaceDebugArrowAttachments[i].ForwardArrowComponent.GetMaterial(0));
+            SurfaceDebugArrowAttachments[i].ForwardArrowMIC.SetVectorParameterValue('Color', ForwardDebugArrowColor);
+            SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetMaterial(0, SurfaceDebugArrowAttachments[i].ForwardArrowMIC);
+
+            SurfaceDebugArrowAttachments[i].LiftArrowMIC = new class'MaterialInstanceConstant';
+            SurfaceDebugArrowAttachments[i].LiftArrowMIC.SetParent(SurfaceDebugArrowAttachments[i].LiftArrowComponent.GetMaterial(0));
+            SurfaceDebugArrowAttachments[i].LiftArrowMIC.SetVectorParameterValue('Color', LiftDebugArrowColor);
+            SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetMaterial(0, SurfaceDebugArrowAttachments[i].LiftArrowMIC);
+
+            SurfaceDebugArrowAttachments[i].DragArrowMIC = new class'MaterialInstanceConstant';
+            SurfaceDebugArrowAttachments[i].DragArrowMIC.SetParent(SurfaceDebugArrowAttachments[i].DragArrowComponent.GetMaterial(0));
+            SurfaceDebugArrowAttachments[i].DragArrowMIC.SetVectorParameterValue('Color', DragDebugArrowColor);
+            SurfaceDebugArrowAttachments[i].DragArrowComponent.SetMaterial(0, SurfaceDebugArrowAttachments[i].DragArrowMIC);
+        }
+    }
 }
 
 simulated event Tick(float DeltaTime)
 {
+    local int i;
+    local AeroSurfaceComponent AeroComp;
+    local vector ForceInWorldSpace;
+    local rotator ForwardArrowRot;
+    local rotator LiftArrowRot;
+    local rotator DragArrowRot;
+
     ROPlayerController(GetALocalPlayerController()).myHud.bShowOverlays = True;
     ROPlayerController(GetALocalPlayerController()).myHud.AddPostRenderedActor(self);
 
@@ -263,16 +341,98 @@ simulated event Tick(float DeltaTime)
 
     HandleInputs();
 
+    if (WorldInfo.NetMode != NM_DedicatedServer)
+    {
+        if (!TotalForceDebugArrowComponent.HiddenGame)
+        {
+            TotalForceDebugArrowComponent.SetAbsolute(false, true);
+            TotalForceDebugArrowComponent.SetRotation(rotator(Velocity));
+        }
+
+        if (!VelocityDebugArrowComponent.HiddenGame)
+        {
+            VelocityDebugArrowComponent.SetAbsolute(false, true);
+            VelocityDebugArrowComponent.SetRotation(rotator(CachedForce));
+        }
+
+        for (i = 0; i < SurfaceDebugArrowAttachments.Length; ++i)
+        {
+            // TODO: scale arrow based on force size?
+
+            if (!SurfaceDebugArrowAttachments[i].ForwardArrowComponent.HiddenGame)
+            {
+                ForceInWorldSpace =
+                    SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
+                    + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedForwardVector) * 100;
+                DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 255, 0);
+
+                ForwardArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].DragArrowComponent.GetPosition());
+                SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetAbsolute(false, true);
+                SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetRotation(ForwardArrowRot);
+            }
+
+            if (!SurfaceDebugArrowAttachments[i].LiftArrowComponent.HiddenGame)
+            {
+                ForceInWorldSpace =
+                    SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
+                    + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedLiftDirection) * 100;
+                DrawDebugSphere(ForceInWorldSpace, 8, 8, 255, 0, 0);
+
+                LiftArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].LiftArrowComponent.GetPosition());
+                SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetAbsolute(false, true);
+                SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetRotation(LiftArrowRot);
+            }
+
+            if (!SurfaceDebugArrowAttachments[i].DragArrowComponent.HiddenGame)
+            {
+                ForceInWorldSpace =
+                    SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
+                    + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedDragDirection) * 100;
+                DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 0, 255);
+
+                DragArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].DragArrowComponent.GetPosition());
+                SurfaceDebugArrowAttachments[i].DragArrowComponent.SetAbsolute(false, true);
+                SurfaceDebugArrowAttachments[i].DragArrowComponent.SetRotation(DragArrowRot);
+            }
+        }
+
+        DrawDebugLine(Location, Location + Velocity, 255, 255, 0); // Yellow
+        DrawDebugSphere(Location + Velocity, 8, 8, 255, 255, 0);
+
+        DrawDebugLine(Location, Location + CachedForce, 30, 30, 255); // Blue
+        DrawDebugSphere(Location + CachedForce, 8, 8, 30, 30, 255);
+
+        if (bDrawDebugTraces)
+        {
+            ForEach AeroSurfaceComponents(AeroComp)
+            {
+                DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedLiftDirection) * 100, 255, 0, 0); // Red
+                DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedLiftDirection) * 100, 8, 8, 255, 0, 0);
+                // class'DebugArrow'.static.Draw(AeroComp.GetPosition(), Normal(AeroComp.CachedLiftDirection) * 250, 255, 0, 0);
+
+                DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 204, 0, 255); // Magenta?
+                DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedDragDirection) * 100, 8, 8, 204, 0, 255);
+
+                // DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 0, 0, 255); // Blue
+                // DrawDebugSphere(AeroComp.GetPosition() + TransformNormal(Mesh.LocalToWorld, Normal(AeroComp.CachedAirVelocity)) * 100, 8, 8, 0, 0, 255);
+
+                DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 0, 255, 0); // Green
+                DrawDebugSphere(AeroComp.GetPosition() + Normal(AeroComp.CachedForwardVector) * 250, 8, 8, 0, 255, 0);
+            }
+        }
+    }
+
     // `log("WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep = " $ WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep,, 'AircraftPhysics');
 }
 
+// TODO: more compact drawing for multiple aero surfaces.
 simulated function DrawAeroSurfaceHUD(Canvas Canvas)
 {
     Canvas.Font = AeroHUDFont;
     // TODO: maybe draw BG after the text so we can get the real width?
     Canvas.TextSize(SizeTestString, TextSize.X, TextSize.Y);
-    // 10 lines of text per surface + a padding of 10.
-    BGHeight = (TextSize.Y * (AeroSurfaceComponents.Length * 10)) + 10;
+    // 8 lines of text per surface + a padding of 10.
+    BGHeight = (TextSize.Y * (AeroSurfaceComponents.Length * 8)) + 10;
     BGWidth = TextSize.X + 10;
 
     DrawRegionTopLeftX = Canvas.SizeX - ((Canvas.SizeX / 11) + BGWidth);
@@ -295,9 +455,9 @@ simulated function DrawAeroSurfaceHUD(Canvas Canvas)
             @ "IsAtStall=" $ AeroSurfaceComponents[DrawIdx].bIsAtStall @ "--"
         );
         Canvas.DrawText("FlapAngle:" @ AeroSurfaceComponents[DrawIdx].FlapAngle);
-        Canvas.DrawText("Area     :" @ AeroSurfaceComponents[DrawIdx].Chord * AeroSurfaceComponents[DrawIdx].Span);
+        // Canvas.DrawText("Area     :" @ AeroSurfaceComponents[DrawIdx].Chord * AeroSurfaceComponents[DrawIdx].Span);
         Canvas.DrawText("DynPres  :" @ AeroSurfaceComponents[DrawIdx].CachedDynamicPressure);
-        Canvas.DrawText("LiftDir  :" @ AeroSurfaceComponents[DrawIdx].CachedLiftDirection);
+        // Canvas.DrawText("LiftDir  :" @ AeroSurfaceComponents[DrawIdx].CachedLiftDirection);
         Canvas.DrawText("Drag     :" @ AeroSurfaceComponents[DrawIdx].CachedDrag @ VSize(AeroSurfaceComponents[DrawIdx].CachedDrag));
         Canvas.DrawText("Lift     :" @ AeroSurfaceComponents[DrawIdx].CachedLift @ VSize(AeroSurfaceComponents[DrawIdx].CachedLift));
         Canvas.DrawText("Force    :" @ AeroSurfaceComponents[DrawIdx].CachedForce @ VSize(AeroSurfaceComponents[DrawIdx].CachedForce));
@@ -318,8 +478,8 @@ simulated function DrawInfoHUD(Canvas Canvas)
     Canvas.Font = AeroHUDFont;
     // TODO: maybe draw BG after the text so we can get the real width?
     Canvas.TextSize(SizeTestStringShort, TextSize.X, TextSize.Y);
-    // 13 lines of text + a padding of 10.
-    BGHeight = (TextSize.Y * 13) + 10;
+    // 14 lines of text + a padding of 10.
+    BGHeight = (TextSize.Y * 14) + 10;
     BGWidth = TextSize.X + 10;
 
     DrawRegionTopLeftX = Canvas.SizeX - ((Canvas.SizeX / 1.5) + BGWidth);
@@ -334,6 +494,7 @@ simulated function DrawInfoHUD(Canvas Canvas)
     Canvas.SetPos(Canvas.CurX + 5, Canvas.CurY + 5); // A bit of padding.
     Canvas.SetDrawColorStruct(AeroHUDTextColor);
 
+    Canvas.DrawText("Mass        :" @ MyMass);
     Canvas.DrawText("CenterOfMass:" @ CachedCOMLocation);
     Canvas.DrawText("ThrustForce :" @ CachedThrustForce @ VSize(CachedThrustForce));
     Canvas.DrawText("Force       :" @ CachedForce @ VSize(CachedForce));
@@ -363,31 +524,31 @@ simulated event PostRenderFor(
     super.PostRenderFor(PC, Canvas, CameraPosition, CameraDir);
 }
 
-simulated function GetSVehicleDebug(out Array<String> DebugInfo)
-{
-    // local int i;
+// simulated function GetSVehicleDebug(out Array<String> DebugInfo)
+// {
+//     // local int i;
 
-    Super(SVehicle).GetSVehicleDebug(DebugInfo);
+//     Super(SVehicle).GetSVehicleDebug(DebugInfo);
 
-    DebugInfo[DebugInfo.Length] = "-- AIRCRAFT DEBUG --";
-    DebugInfo[DebugInfo.Length] = "";
+//     DebugInfo[DebugInfo.Length] = "-- AIRCRAFT DEBUG --";
+//     DebugInfo[DebugInfo.Length] = "";
 
-    // for (i = 0; i < AeroSurfaceComponents.Length; ++i)
-    // {
-    //     DebugInfo[DebugInfo.Length] = "Surface " $ AeroSurfaceComponents[i].SurfaceName $ " [" $ i
-    //         $ "]: FlapAngle=" $ AeroSurfaceComponents[i].FlapAngle
-    //         $ "|Area=" $ AeroSurfaceComponents[i].Chord * AeroSurfaceComponents[i].Span
-    //         $ "|LiftCoe=" $ AeroSurfaceComponents[i].CachedLiftCoeff
-    //         $ "|DragCoe=" $ AeroSurfaceComponents[i].CachedDragCoeff
-    //         $ "|TangCoe=" $ AeroSurfaceComponents[i].CachedTangentialCoeff
-    //         $ "|DynPres=" $ AeroSurfaceComponents[i].CachedDynamicPressure;
+//     // for (i = 0; i < AeroSurfaceComponents.Length; ++i)
+//     // {
+//     //     DebugInfo[DebugInfo.Length] = "Surface " $ AeroSurfaceComponents[i].SurfaceName $ " [" $ i
+//     //         $ "]: FlapAngle=" $ AeroSurfaceComponents[i].FlapAngle
+//     //         $ "|Area=" $ AeroSurfaceComponents[i].Chord * AeroSurfaceComponents[i].Span
+//     //         $ "|LiftCoe=" $ AeroSurfaceComponents[i].CachedLiftCoeff
+//     //         $ "|DragCoe=" $ AeroSurfaceComponents[i].CachedDragCoeff
+//     //         $ "|TangCoe=" $ AeroSurfaceComponents[i].CachedTangentialCoeff
+//     //         $ "|DynPres=" $ AeroSurfaceComponents[i].CachedDynamicPressure;
 
-    //     DebugInfo[DebugInfo.Length] = "Lift=" $ AeroSurfaceComponents[i].CachedLift
-    //         $ "|Drag=" $ AeroSurfaceComponents[i].CachedDrag
-    //         $ "|Force=" $ AeroSurfaceComponents[i].CachedForce
-    //         $ "|Torque=" $ AeroSurfaceComponents[i].CachedTorque;
-    // }
-}
+//     //     DebugInfo[DebugInfo.Length] = "Lift=" $ AeroSurfaceComponents[i].CachedLift
+//     //         $ "|Drag=" $ AeroSurfaceComponents[i].CachedDrag
+//     //         $ "|Force=" $ AeroSurfaceComponents[i].CachedForce
+//     //         $ "|Torque=" $ AeroSurfaceComponents[i].CachedTorque;
+//     // }
+// }
 
 simulated function HandleInputs()
 {
@@ -565,17 +726,20 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     // `log("UnrealWorldVelocity        = " $ UnrealWorldVelocity,, 'AircraftPhysics');
     // `log("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity,, 'AircraftPhysics');
 
-    PredictedVelocity = PredictVelocity2(ForceThisFrame + ThrustForce, DeltaTime);
+    // TODO: skipping prediction sub-step for now.
+    // PredictedVelocity = PredictVelocity2(ForceThisFrame + ThrustForce, DeltaTime);
 
     // TODO: see if this can be done in UE3 reliably.
     // PredictedAngularVelocity = PredictAngularVelocity(TorqueThisFrame);
 
-    CalculateAerodynamicForces(PredictedVelocity, UnrealWorldAngularVelocity,
-        /*Vect(0, 0, 0),*/ 1.2f, COMLocation, PredictedForce, PredictedTorque);
+    // TODO: skipping prediction sub-step for now.
+    // CalculateAerodynamicForces(PredictedVelocity, UnrealWorldAngularVelocity,
+    //     /*Vect(0, 0, 0),*/ 1.2f, COMLocation, PredictedForce, PredictedTorque);
 
-
-    CurrentForce = (DeltaTime * ((ForceThisFrame + PredictedForce) * 0.5));
-    CurrentTorque = (DeltaTime * (TorqueThisFrame));
+    // TODO: skipping prediction sub-step for now.
+    // CurrentForce = (DeltaTime * ((ForceThisFrame + PredictedForce) * 0.5));
+    CurrentForce = DeltaTime * ForceThisFrame;
+    CurrentTorque = DeltaTime * TorqueThisFrame;
 
     // TODO: temporary hacks.
     CurrentForce *= ForceScaler;
@@ -645,11 +809,11 @@ simulated function CalculateAerodynamicForces(
     // OutTorque = Torque;
 }
 
-simulated function vector PredictVelocity(vector Force)
-{
-    return (Velocity + WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep
-        * PREDICTION_TIMESTEP_FRACTION * Force / MyMass);
-}
+// simulated function vector PredictVelocity(vector Force)
+// {
+//     return (Velocity + WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep
+//         * PREDICTION_TIMESTEP_FRACTION * Force / MyMass);
+// }
 
 simulated function vector PredictVelocity2(vector Force, float DeltaTime)
 {
@@ -669,6 +833,9 @@ simulated function vector PredictAngularVelocity(vector Torque)
     {
         return Torque;
     }
+
+    // TODO: since we don't have tensors available in UScript,
+    // we have to calculate inertia tensor ourselves?
 
     // `log("PredictAngularVelocity:Torque = " $ Torque,, 'AircraftPhysics');
 
@@ -831,4 +998,46 @@ DefaultProperties
     bDrawSurfaceForwardArrows=True
     bDrawSurfaceLiftArrows=True
     bDrawSurfaceDragArrows=True
+
+    ForwardDebugArrowColor = (R=0.1, G=1.0, B=0.1, A=1.0)
+    LiftDebugArrowColor    = (R=1.0, G=0.1, B=0.1, A=1.0)
+    DragDebugArrowColor    = (R=0.1, G=0.1, B=1.0, A=1.0)
+
+    TotalForceDebugArrowSocketName=RootSocket
+    VelocityDebugArrowSocketName=RootSocket
+
+    TotalForceDebugArrowColor = (R=0.2, G=0.2, B=1.0, A=1.0)
+    VelocityDebugArrowColor   = (R=1.0, G=1.0, B=0.1, A=1.0)
+
+    Begin Object class=ROSkeletalMeshComponent name=TotalForceDebugArrow
+        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
+        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
+        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+        LightEnvironment=MyLightEnvironment
+        CastShadow=false
+        DepthPriorityGroup=SDPG_World
+        HiddenGame=false
+        CollideActors=false
+        BlockActors=false
+        BlockZeroExtent=false
+        BlockNonZeroExtent=false
+        bAcceptsDynamicDecals=false
+    End Object
+    TotalForceDebugArrowComponent = TotalForceDebugArrow
+
+    Begin Object class=ROSkeletalMeshComponent name=VelocityDebugArrow
+        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
+        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
+        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+        LightEnvironment=MyLightEnvironment
+        CastShadow=false
+        DepthPriorityGroup=SDPG_World
+        HiddenGame=false
+        CollideActors=false
+        BlockActors=false
+        BlockZeroExtent=false
+        BlockNonZeroExtent=false
+        bAcceptsDynamicDecals=false
+    End Object
+    VelocityDebugArrowComponent = VelocityDebugArrow
 }

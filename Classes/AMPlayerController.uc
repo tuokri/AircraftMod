@@ -133,7 +133,98 @@ simulated exec function SetAMScalers(float ForceScaler = 1.0, float TorqueScaler
     }
 }
 
-simulated exec function SetAMHUD(class<HUD> HUDType = class'AMHUD')
+simulated exec function SetAMHUD(optional class<HUD> HUDType = class'AMHUD')
 {
     ClientSetHud(HUDType);
+}
+
+simulated exec function SetDebugArrowOpacity(float Opacity)
+{
+    local AMVehicleAircraft Aircraft;
+    local int i;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        for (i = 0; i < Aircraft.SurfaceDebugArrowAttachments.Length; ++i)
+        {
+            Aircraft.SurfaceDebugArrowAttachments[i].ForwardArrowMIC.SetScalarParameterValue('Opacity', Opacity);
+            Aircraft.SurfaceDebugArrowAttachments[i].LiftArrowMIC.SetScalarParameterValue('Opacity', Opacity);
+            Aircraft.SurfaceDebugArrowAttachments[i].DragArrowMIC.SetScalarParameterValue('Opacity', Opacity);
+        }
+    }
+}
+
+simulated exec function SetDebugArrowColors(
+    optional LinearColor ForwardArrowColor,
+    optional LinearColor LiftArrowColor,
+    optional LinearColor DebugArrowColor)
+{
+    local AMVehicleAircraft Aircraft;
+    local int i;
+
+    if (ForwardArrowColor.R == 0 && ForwardArrowColor.G == 0 && ForwardArrowColor.B == 0)
+    {
+        ForwardArrowColor.R = 0.1;
+        ForwardArrowColor.G = 1;
+        ForwardArrowColor.B = 0.1;
+    }
+
+    if (LiftArrowColor.R == 0 && LiftArrowColor.G == 0 && LiftArrowColor.B == 0)
+    {
+        LiftArrowColor.R = 1;
+        LiftArrowColor.G = 0.1;
+        LiftArrowColor.B = 0.1;
+    }
+
+    if (DebugArrowColor.R == 0 && DebugArrowColor.G == 0 && DebugArrowColor.B == 0)
+    {
+        DebugArrowColor.R = 0.1;
+        DebugArrowColor.G = 0.1;
+        DebugArrowColor.B = 1;
+    }
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        for (i = 0; i < Aircraft.SurfaceDebugArrowAttachments.Length; ++i)
+        {
+            Aircraft.SurfaceDebugArrowAttachments[i].ForwardArrowMIC.SetVectorParameterValue('Color', ForwardArrowColor);
+            Aircraft.SurfaceDebugArrowAttachments[i].LiftArrowMIC.SetVectorParameterValue('Color', LiftArrowColor);
+            Aircraft.SurfaceDebugArrowAttachments[i].DragArrowMIC.SetVectorParameterValue('Color', DebugArrowColor);
+        }
+    }
+}
+
+simulated exec function AMDrawDebugTraces(optional bool bDrawDebugTraces = true)
+{
+    local AMVehicleAircraft Aircraft;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        Aircraft.bDrawDebugTraces = bDrawDebugTraces;
+    }
+}
+
+simulated exec function AMDrawDebugArrows(
+    optional bool bDrawForwardArrows = true,
+    optional bool bDrawLiftArrows = true,
+    optional bool bDrawDragArrows = true,
+    optional bool bDrawTotalForceArrows = true,
+    optional bool bDrawVelocityArrows = true
+)
+{
+    local int i;
+    local AMVehicleAircraft Aircraft;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        for (i = 0; i < Aircraft.SurfaceDebugArrowAttachments.Length; ++i)
+        {
+            Aircraft.SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetHidden(!bDrawForwardArrows);
+            Aircraft.SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetHidden(!bDrawLiftArrows);
+            Aircraft.SurfaceDebugArrowAttachments[i].DragArrowComponent.SetHidden(!bDrawDragArrows);
+        }
+
+        Aircraft.TotalForceDebugArrowComponent.SetHidden(!bDrawTotalForceArrows);
+        Aircraft.VelocityDebugArrowComponent.SetHidden(!bDrawVelocityArrows);
+    }
 }

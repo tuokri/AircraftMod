@@ -192,13 +192,9 @@ simulated function CalculateForces(
     AirVelocity = InverseTransformNormal(LocalToWorld, WorldAirVelocity);
     // Ignore the component perpendicular to surface since it only causes skin friction.
     AirVelocity.Y = 0; // TODO: In unity the Z component is discarded? And in Unreal Y?
-    DragDirection = TransformNormal(LocalToWorld /*RotMatrix*/, Normal(AirVelocity));
+    DragDirection = TransformNormal(LocalToWorld, Normal(AirVelocity));
     LiftDirection = Normal(DragDirection cross ForwardVector);
     DragDirection = Normal(DragDirection);
-
-    // `log("###### LiftDirection SIZE :" @ VSize(LiftDirection));
-    // `log("###### DragDirection SIZE :" @ VSize(DragDirection));
-    // `log("###### AirVelocity SIZE   :" @ VSize(AirVelocity));
 
     // DEBUG ONLY.
     CachedAirVelocity = AirVelocity;
@@ -246,7 +242,7 @@ simulated function CalculateForces(
     CachedForce = LocalForce;
 
     // TODO: where to do the unit conversions for torque?
-    LocalTorque = ((RelativePosition cross LocalForce) * UU_TO_METERS) + Torque;
+    LocalTorque = ((RelativePosition cross LocalForce) /* * UU_TO_METERS */) + Torque;
     // LocalTorque = ClampLength(LocalTorque, MaxTorque);
     CachedTorque = LocalTorque;
 
