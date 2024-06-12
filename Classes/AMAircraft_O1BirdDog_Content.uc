@@ -339,6 +339,7 @@ DefaultProperties
     */
 
     Begin Object Class=AeroSurfaceComponent name=FuselageSurface01
+        SurfaceName=Fuselage01
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=0
@@ -356,6 +357,7 @@ DefaultProperties
     Components.Add(FuselageSurface01)
 
     Begin Object Class=AeroSurfaceComponent name=FuselageSurface02
+        SurfaceName=Fuselage02
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=0
@@ -466,7 +468,7 @@ DefaultProperties
         AspectRatio=7
         bIsControlSurface=False
         InputType=EIT_None
-        AttachmentTargetName=R_Wing
+        AttachmentTargetName=L_Wing
         bAttachToSocket=True
     End Object
     Components.Add(WingSurfaceLeft)
@@ -484,12 +486,13 @@ DefaultProperties
         AspectRatio=7
         bIsControlSurface=False
         InputType=EIT_None
-        AttachmentTargetName=L_Wing
+        AttachmentTargetName=R_Wing
         bAttachToSocket=True
     End Object
     Components.Add(WingSurfaceRight)
 
     Begin Object Class=AeroSurfaceComponent name=RudderSurface
+        SurfaceName=Rudder
         LiftSlope=6.28
         SkinFriction=0.02
         ZeroLiftAOA=0
@@ -508,203 +511,131 @@ DefaultProperties
     End Object
     Components.Add(RudderSurface)
 
-    AeroSurfaceComponents(0)=FuselageSurface01
-    AeroSurfaceComponents(1)=FuselageSurface02
-    AeroSurfaceComponents(2)=ElevatorSurfaceLeft
-    AeroSurfaceComponents(3)=ElevatorSurfaceRight
-    AeroSurfaceComponents(4)=AileronSurfaceLeft
-    AeroSurfaceComponents(5)=AileronSurfaceRight
-    AeroSurfaceComponents(6)=WingSurfaceRight
-    AeroSurfaceComponents(7)=WingSurfaceLeft
-    AeroSurfaceComponents(8)=RudderSurface
+    // AeroSurfaceComponents(0)=FuselageSurface01
+    // AeroSurfaceComponents(1)=FuselageSurface02
+    // AeroSurfaceComponents(2)=ElevatorSurfaceLeft
+    // AeroSurfaceComponents(3)=ElevatorSurfaceRight
+    // AeroSurfaceComponents(4)=AileronSurfaceLeft
+    // AeroSurfaceComponents(5)=AileronSurfaceRight
+    // AeroSurfaceComponents(6)=WingSurfaceRight
+    // AeroSurfaceComponents(7)=WingSurfaceLeft
+    // AeroSurfaceComponents(8)=RudderSurface
 
-    // AeroSurfaceComponents(0)=ElevatorSurfaceLeft
-    // AeroSurfaceComponents(1)=ElevatorSurfaceRight
-    // AeroSurfaceComponents(2)=AileronSurfaceLeft
-    // AeroSurfaceComponents(3)=AileronSurfaceRight
-    // AeroSurfaceComponents(4)=WingSurfaceRight
-    // AeroSurfaceComponents(5)=WingSurfaceLeft
+    AeroSurfaceComponents(0)=ElevatorSurfaceLeft
+    AeroSurfaceComponents(1)=ElevatorSurfaceRight
+    AeroSurfaceComponents(2)=AileronSurfaceLeft
+    AeroSurfaceComponents(3)=AileronSurfaceRight
+    AeroSurfaceComponents(4)=WingSurfaceRight
+    AeroSurfaceComponents(5)=WingSurfaceLeft
 
     // ------------------ Debug Arrow Attachments ------------------ //
 
-    Begin Object class=ROSkeletalMeshComponent name=ForwardArrow_ElevatorSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_ElevatorSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=LiftArrow_ElevatorSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_ElevatorSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=DragArrow_ElevatorSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=DragArrow_ElevatorSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=ForwardArrow_ElevatorSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_ElevatorSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=LiftArrow_ElevatorSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_ElevatorSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=DragArrow_ElevatorSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=DragArrow_ElevatorSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=ForwardArrow_AileronSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_AileronSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=LiftArrow_AileronSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_AileronSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=DragArrow_AileronSurfaceLeft
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=DragArrow_AileronSurfaceLeft
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=ForwardArrow_AileronSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_AileronSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=LiftArrow_AileronSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_AileronSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
     End Object
 
-    Begin Object class=ROSkeletalMeshComponent name=DragArrow_AileronSurfaceRight
-        SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
-        Materials(0)=MaterialInstanceConstant'BirdDog.Materials.MIC_DebugArrow'
-        LightingChannels=(Dynamic=TRUE,Unnamed_1=FALSE,bInitialized=TRUE)
+    Begin Object class=AMDebugArrowComponent name=DragArrow_AileronSurfaceRight
         LightEnvironment=MyLightEnvironment
-        CastShadow=false
-        DepthPriorityGroup=SDPG_World
-        HiddenGame=false
-        CollideActors=false
-        BlockActors=false
-        BlockZeroExtent=false
-        BlockNonZeroExtent=false
-        bAcceptsDynamicDecals=false
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_WingSurfaceRight
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_WingSurfaceRight
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=DragArrow_WingSurfaceRight
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_WingSurfaceLeft
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_WingSurfaceLeft
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=DragArrow_WingSurfaceLeft
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_RudderSurface
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_RudderSurface
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=DragArrow_RudderSurface
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_FuselageSurface01
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_FuselageSurface01
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=DragArrow_FuselageSurface01
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=ForwardArrow_FuselageSurface02
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=LiftArrow_FuselageSurface02
+        LightEnvironment=MyLightEnvironment
+    End Object
+
+    Begin Object class=AMDebugArrowComponent name=DragArrow_FuselageSurface02
+        LightEnvironment=MyLightEnvironment
     End Object
 
     SurfaceDebugArrowAttachments(0)={(
@@ -738,6 +669,46 @@ DefaultProperties
         DragArrowComponent=DragArrow_AileronSurfaceRight,
         AttachmentSocketName=R_Aileron,
         SurfaceComponent=AileronSurfaceRight
+    )}
+    SurfaceDebugArrowAttachments(4)={(
+        AttachmentName=DebugArrows_WingSurfaceRight,
+        ForwardArrowComponent=ForwardArrow_WingSurfaceRight,
+        LiftArrowComponent=LiftArrow_WingSurfaceRight,
+        DragArrowComponent=DragArrow_WingSurfaceRight,
+        AttachmentSocketName=R_Wing,
+        SurfaceComponent=WingSurfaceRight
+    )}
+    SurfaceDebugArrowAttachments(5)={(
+        AttachmentName=DebugArrows_WingSurfaceLeft,
+        ForwardArrowComponent=ForwardArrow_WingSurfaceLeft,
+        LiftArrowComponent=LiftArrow_WingSurfaceLeft,
+        DragArrowComponent=DragArrow_WingSurfaceLeft,
+        AttachmentSocketName=L_Wing,
+        SurfaceComponent=WingSurfaceLeft
+    )}
+    SurfaceDebugArrowAttachments(6)={(
+        AttachmentName=DebugArrows_RudderSurface,
+        ForwardArrowComponent=ForwardArrow_RudderSurface,
+        LiftArrowComponent=LiftArrow_RudderSurface,
+        DragArrowComponent=DragArrow_RudderSurface,
+        AttachmentSocketName=Rudder,
+        SurfaceComponent=RudderSurface
+    )}
+    SurfaceDebugArrowAttachments(7)={(
+        AttachmentName=DebugArrows_FuselageSurface01,
+        ForwardArrowComponent=ForwardArrow_FuselageSurface01,
+        LiftArrowComponent=LiftArrow_FuselageSurface01,
+        DragArrowComponent=DragArrow_FuselageSurface01,
+        AttachmentSocketName=Fuselage01,
+        SurfaceComponent=FuselageSurface01
+    )}
+    SurfaceDebugArrowAttachments(8)={(
+        AttachmentName=DebugArrows_FuselageSurface02,
+        ForwardArrowComponent=ForwardArrow_FuselageSurface02,
+        LiftArrowComponent=LiftArrow_FuselageSurface02,
+        DragArrowComponent=DragArrow_FuselageSurface02,
+        AttachmentSocketName=Fuselage02,
+        SurfaceComponent=FuselageSurface02
     )}
 
     /*

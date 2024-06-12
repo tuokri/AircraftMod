@@ -209,22 +209,23 @@ simulated exec function AMDrawDebugArrows(
     optional bool bDrawLiftArrows = true,
     optional bool bDrawDragArrows = true,
     optional bool bDrawTotalForceArrows = true,
-    optional bool bDrawVelocityArrows = true
-)
+    optional bool bDrawVelocityArrows = true)
 {
-    local int i;
     local AMVehicleAircraft Aircraft;
 
     ForEach AllActors(class'AMVehicleAircraft', Aircraft)
     {
-        for (i = 0; i < Aircraft.SurfaceDebugArrowAttachments.Length; ++i)
-        {
-            Aircraft.SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetHidden(!bDrawForwardArrows);
-            Aircraft.SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetHidden(!bDrawLiftArrows);
-            Aircraft.SurfaceDebugArrowAttachments[i].DragArrowComponent.SetHidden(!bDrawDragArrows);
-        }
+        AirCraft.SetDrawDebugArrows(bDrawForwardArrows, bDrawLiftArrows, bDrawDragArrows,
+            bDrawTotalForceArrows, bDrawVelocityArrows);
+    }
+}
 
-        Aircraft.TotalForceDebugArrowComponent.SetHidden(!bDrawTotalForceArrows);
-        Aircraft.VelocityDebugArrowComponent.SetHidden(!bDrawVelocityArrows);
+simulated exec function SetIgnoreSurfaceIndexForDebugHUD(int Index, optional bool bIgnore = true)
+{
+    local AMVehicleAircraft Aircraft;
+
+    ForEach AllActors(class'AMVehicleAircraft', Aircraft)
+    {
+        AirCraft.SetIgnoreSurfaceIndexForDebugHUD(Index, bIgnore);
     }
 }

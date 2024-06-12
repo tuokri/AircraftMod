@@ -72,6 +72,8 @@ var(AerodynamicsDebug) LinearColor ForwardDebugArrowColor;
 var(AerodynamicsDebug) LinearColor LiftDebugArrowColor;
 var(AerodynamicsDebug) LinearColor DragDebugArrowColor;
 var(AerodynamicsDebug) bool bDrawDebugTraces;
+// TODO: just do this with a bit mask?
+var(AerodynamicsDebug) array<int> IgnoredSurfaceIndicesForDebugHUD;
 
 var(AerodynamicsDebug) name TotalForceDebugArrowSocketName;
 var(AerodynamicsDebug) name VelocityDebugArrowSocketName;
@@ -82,6 +84,7 @@ var(AerodynamicsDebug) MaterialInstanceConstant VelocityDebugArrowMIC;
 var(AerodynamicsDebug) LinearColor TotalForceDebugArrowColor;
 var(AerodynamicsDebug) LinearColor VelocityDebugArrowColor;
 
+var float MySpeed;
 var float MyMass;
 var float ThrustPercent;
 // var vector CurrentForce;
@@ -283,7 +286,29 @@ simulated function PostBeginPlay()
             SurfaceDebugArrowAttachments[i].DragArrowMIC.SetVectorParameterValue('Color', DragDebugArrowColor);
             SurfaceDebugArrowAttachments[i].DragArrowComponent.SetMaterial(0, SurfaceDebugArrowAttachments[i].DragArrowMIC);
         }
+
+        SetDrawDebugArrows(false, true, true, true, true);
     }
+}
+
+simulated function SetDrawDebugArrows(
+    optional bool bDrawForwardArrows = true,
+    optional bool bDrawLiftArrows = true,
+    optional bool bDrawDragArrows = true,
+    optional bool bDrawTotalForceArrows = true,
+    optional bool bDrawVelocityArrows = true)
+{
+    local int i;
+
+    for (i = 0; i < SurfaceDebugArrowAttachments.Length; ++i)
+    {
+        SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetHidden(!bDrawForwardArrows);
+        SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetHidden(!bDrawLiftArrows);
+        SurfaceDebugArrowAttachments[i].DragArrowComponent.SetHidden(!bDrawDragArrows);
+    }
+
+    TotalForceDebugArrowComponent.SetHidden(!bDrawTotalForceArrows);
+    VelocityDebugArrowComponent.SetHidden(!bDrawVelocityArrows);
 }
 
 simulated event Tick(float DeltaTime)
@@ -301,14 +326,16 @@ simulated event Tick(float DeltaTime)
 
     Super.Tick(DeltaTime);
 
+    MySpeed = VSize(Velocity);
+
     // Mesh.GetRootBodyInstance().CustomGravityFactor = CustomGravityFactor;
 
-    if( bHasBeenDriven )
+    if (bHasBeenDriven)
     {
         // CalculateRPM(DeltaTime);
     }
 
-    if( Role == ROLE_Authority )
+    if (Role == ROLE_Authority)
     {
         /*
         if( bAutoHover )
@@ -317,7 +344,7 @@ simulated event Tick(float DeltaTime)
         }
         */
 
-        if( CurrentRPM > 10 && Health > 0 ) // TODO: Remove this health check and let the dead mesh continue to perform the rotor break checks (add sockets to dead mesh)
+        if (CurrentRPM > 10 && Health > 0) // TODO: Remove this health check and let the dead mesh continue to perform the rotor break checks (add sockets to dead mesh)
         {
             // CheckRotorCollision(DeltaTime);
         }
@@ -326,14 +353,14 @@ simulated event Tick(float DeltaTime)
     // UpdateHeloEffects();
 
     // If we're on the ground without anyone in a pilot seat, shut the engine down
-    if( bEngineOn && !bDriving && !bBackseatDriving && (bVehicleOnGround || bWasChassisTouchingGroundLastTick) )
+    if (bEngineOn && !bDriving && !bBackseatDriving && (bVehicleOnGround || bWasChassisTouchingGroundLastTick))
     {
         ShutDownEngine();
     }
 
     // CalculateEngineRPM(DeltaTime);
 
-    if( Health > 0 )
+    if (Health > 0)
     {
         // CalculateLiftAndTorque(DeltaTime);
         UpdateAltitude();
@@ -348,7 +375,7 @@ simulated event Tick(float DeltaTime)
         {
             TotalForceDebugArrowComponent.SetAbsolute(false, true);
             TotalForceDebugArrowComponent.SetRotation(rotator(CachedForce));
-            ArrowScale3D.X = ReScale(VSize(CachedForce), 0.0, MaxForce, 1.0, 10.0);
+            ArrowScale3D.X = ReScale(VSize(CachedForce), 0.0, MaxForce, 1.0, 150.0);
             ArrowScale3D.Y = 1;
             ArrowScale3D.Z = 1;
             TotalForceDebugArrowComponent.SetScale3D(ArrowScale3D);
@@ -358,7 +385,7 @@ simulated event Tick(float DeltaTime)
         {
             VelocityDebugArrowComponent.SetAbsolute(false, true);
             VelocityDebugArrowComponent.SetRotation(rotator(Velocity));
-            ArrowScale3D.X = ReScale(VSize(Velocity), 0.0, MaxSpeed, 1.0, 10.0);
+            ArrowScale3D.X = ReScale(MySpeed, 0.0, MaxSpeed, 1.0, 150.0);
             ArrowScale3D.Y = 1;
             ArrowScale3D.Z = 1;
             VelocityDebugArrowComponent.SetScale3D(ArrowScale3D);
@@ -373,7 +400,7 @@ simulated event Tick(float DeltaTime)
                 ForceInWorldSpace =
                     SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
                     + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedForwardVector) * 100;
-                DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 255, 0);
+                // DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 255, 0);
 
                 ForwardArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].DragArrowComponent.GetPosition());
                 SurfaceDebugArrowAttachments[i].ForwardArrowComponent.SetAbsolute(false, true);
@@ -385,7 +412,7 @@ simulated event Tick(float DeltaTime)
                 ForceInWorldSpace =
                     SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
                     + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedLiftDirection) * 100;
-                DrawDebugSphere(ForceInWorldSpace, 8, 8, 255, 0, 0);
+                // DrawDebugSphere(ForceInWorldSpace, 8, 8, 255, 0, 0);
 
                 LiftArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].LiftArrowComponent.GetPosition());
                 SurfaceDebugArrowAttachments[i].LiftArrowComponent.SetAbsolute(false, true);
@@ -397,7 +424,7 @@ simulated event Tick(float DeltaTime)
                 ForceInWorldSpace =
                     SurfaceDebugArrowAttachments[i].SurfaceComponent.GetPosition()
                     + Normal(SurfaceDebugArrowAttachments[i].SurfaceComponent.CachedDragDirection) * 100;
-                DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 0, 255);
+                // DrawDebugSphere(ForceInWorldSpace, 8, 8, 0, 0, 255);
 
                 DragArrowRot = rotator(ForceInWorldSpace - SurfaceDebugArrowAttachments[i].DragArrowComponent.GetPosition());
                 SurfaceDebugArrowAttachments[i].DragArrowComponent.SetAbsolute(false, true);
@@ -405,14 +432,14 @@ simulated event Tick(float DeltaTime)
             }
         }
 
-        DrawDebugLine(Location, Location + Velocity, 255, 255, 0); // Yellow
-        DrawDebugSphere(Location + Velocity, 8, 8, 255, 255, 0);
-
-        DrawDebugLine(Location, Location + CachedForce, 30, 30, 255); // Blue
-        DrawDebugSphere(Location + CachedForce, 8, 8, 30, 30, 255);
-
         if (bDrawDebugTraces)
         {
+            DrawDebugLine(Location, Location + Velocity, 255, 255, 0); // Yellow
+            DrawDebugSphere(Location + Velocity, 8, 8, 255, 255, 0);
+
+            DrawDebugLine(Location, Location + CachedForce, 30, 30, 255); // Blue
+            DrawDebugSphere(Location + CachedForce, 8, 8, 30, 30, 255);
+
             ForEach AeroSurfaceComponents(AeroComp)
             {
                 DrawDebugLine(AeroComp.GetPosition(), AeroComp.GetPosition() + Normal(AeroComp.CachedLiftDirection) * 100, 255, 0, 0); // Red
@@ -440,12 +467,13 @@ simulated function DrawAeroSurfaceHUD(Canvas Canvas)
     Canvas.Font = AeroHUDFont;
     // TODO: maybe draw BG after the text so we can get the real width?
     Canvas.TextSize(SizeTestString, TextSize.X, TextSize.Y);
-    // 8 lines of text per surface + a padding of 10.
-    BGHeight = (TextSize.Y * (AeroSurfaceComponents.Length * 8)) + 10;
+    // 10 lines of text per surface + a padding of 10 (- ignored surface lines).
+    BGHeight = (
+        TextSize.Y * ((AeroSurfaceComponents.Length - IgnoredSurfaceIndicesForDebugHUD.Length) * 10)) + 10;
     BGWidth = TextSize.X + 10;
 
     DrawRegionTopLeftX = Canvas.SizeX - ((Canvas.SizeX / 11) + BGWidth);
-    DrawRegionTopLeftY = (Canvas.SizeY / 14);
+    DrawRegionTopLeftY = 5;
 
     Canvas.SetPos(DrawRegionTopLeftX, DrawRegionTopLeftY);
     Canvas.DrawTileStretched(AeroHUDBGTex, BGWidth, BGHeight, 0, 0,
@@ -460,17 +488,27 @@ simulated function DrawAeroSurfaceHUD(Canvas Canvas)
     TotalDrag = vect(0, 0, 0);
     for (DrawIdx = 0; DrawIdx < AeroSurfaceComponents.Length; ++DrawIdx)
     {
+        if (IgnoredSurfaceIndicesForDebugHUD.Find(DrawIdx) != INDEX_NONE)
+        {
+            continue;
+        }
+
         Canvas.DrawText("-- Surface[" $ DrawIdx $ "]" @ AeroSurfaceComponents[DrawIdx].SurfaceName
-            @ "IsAtStall=" $ AeroSurfaceComponents[DrawIdx].bIsAtStall @ "--"
+            @ "Stall=" $ AeroSurfaceComponents[DrawIdx].bIsAtStall
+            @ "FlapAngle=" $ AeroSurfaceComponents[DrawIdx].FlapAngle
+            @ "--"
         );
-        Canvas.DrawText("FlapAngle:" @ AeroSurfaceComponents[DrawIdx].FlapAngle);
-        // Canvas.DrawText("Area     :" @ AeroSurfaceComponents[DrawIdx].Chord * AeroSurfaceComponents[DrawIdx].Span);
-        Canvas.DrawText("DynPres  :" @ AeroSurfaceComponents[DrawIdx].CachedDynamicPressure);
+        Canvas.DrawText("DynPres  :" @ AeroSurfaceComponents[DrawIdx].CachedDynamicPressure
+            @ "Area:" @ AeroSurfaceComponents[DrawIdx].Chord * AeroSurfaceComponents[DrawIdx].Span
+        );
         // Canvas.DrawText("LiftDir  :" @ AeroSurfaceComponents[DrawIdx].CachedLiftDirection);
         Canvas.DrawText("Drag     :" @ AeroSurfaceComponents[DrawIdx].CachedDrag @ VSize(AeroSurfaceComponents[DrawIdx].CachedDrag));
         Canvas.DrawText("Lift     :" @ AeroSurfaceComponents[DrawIdx].CachedLift @ VSize(AeroSurfaceComponents[DrawIdx].CachedLift));
         Canvas.DrawText("Force    :" @ AeroSurfaceComponents[DrawIdx].CachedForce @ VSize(AeroSurfaceComponents[DrawIdx].CachedForce));
         Canvas.DrawText("Torque   :" @ AeroSurfaceComponents[DrawIdx].CachedTorque @ VSize(AeroSurfaceComponents[DrawIdx].CachedTorque));
+        Canvas.DrawText("TempTorq :" @ AeroSurfaceComponents[DrawIdx].TempTorque @ VSize(AeroSurfaceComponents[DrawIdx].TempTorque));
+        Canvas.DrawText("AeroTorq :" @ AeroSurfaceComponents[DrawIdx].AeroTorque @ VSize(AeroSurfaceComponents[DrawIdx].AeroTorque));
+        Canvas.DrawText("AoA      :" @ AeroSurfaceComponents[DrawIdx].CachedAngleOfAttack);
         Canvas.DrawText("Lift,Drag,Tang (coeffs):"
             @ AeroSurfaceComponents[DrawIdx].CachedLiftCoeff
             @ AeroSurfaceComponents[DrawIdx].CachedDragCoeff
@@ -482,13 +520,37 @@ simulated function DrawAeroSurfaceHUD(Canvas Canvas)
     }
 }
 
+simulated function SetIgnoreSurfaceIndexForDebugHUD(int Index, optional bool bIgnore = true)
+{
+    local int ArrayIdx;
+
+    ArrayIdx = IgnoredSurfaceIndicesForDebugHUD.Find(Index);
+
+    if (bIgnore)
+    {
+        if (ArrayIdx == INDEX_NONE)
+        {
+            IgnoredSurfaceIndicesForDebugHUD.AddItem(Index);
+        }
+        // Else: already ignored.
+    }
+    else
+    {
+        if (ArrayIdx != INDEX_NONE)
+        {
+            IgnoredSurfaceIndicesForDebugHUD.Remove(ArrayIdx, 1);
+        }
+        // Else: not ignored, nothing to do.
+    }
+}
+
 simulated function DrawInfoHUD(Canvas Canvas)
 {
     Canvas.Font = AeroHUDFont;
     // TODO: maybe draw BG after the text so we can get the real width?
     Canvas.TextSize(SizeTestStringShort, TextSize.X, TextSize.Y);
-    // 14 lines of text + a padding of 10.
-    BGHeight = (TextSize.Y * 14) + 10;
+    // 15 lines of text + a padding of 10.
+    BGHeight = (TextSize.Y * 15) + 10;
     BGWidth = TextSize.X + 10;
 
     DrawRegionTopLeftX = Canvas.SizeX - ((Canvas.SizeX / 1.5) + BGWidth);
@@ -503,6 +565,7 @@ simulated function DrawInfoHUD(Canvas Canvas)
     Canvas.SetPos(Canvas.CurX + 5, Canvas.CurY + 5); // A bit of padding.
     Canvas.SetDrawColorStruct(AeroHUDTextColor);
 
+    Canvas.DrawText("Ignored:    :" @ IntArrayToString(IgnoredSurfaceIndicesForDebugHUD));
     Canvas.DrawText("Mass        :" @ MyMass);
     Canvas.DrawText("CenterOfMass:" @ CachedCOMLocation);
     Canvas.DrawText("ThrustForce :" @ CachedThrustForce @ VSize(CachedThrustForce));
@@ -511,12 +574,31 @@ simulated function DrawInfoHUD(Canvas Canvas)
     Canvas.DrawText("Thrust/Mass :" @ VSize(CachedThrustForce) / MyMass);
     Canvas.DrawText("Force/Mass  :" @ VSize(CachedForce) / MyMass);
     Canvas.DrawText("Torque/Mass :" @ VSize(CachedTorque) / MyMass);
-    Canvas.DrawText("UU/s :" @ VSize(Velocity));
-    Canvas.DrawText("km/h :" @ VSize(Velocity) * 0.02 * 3.6);
-    Canvas.DrawText("mph  :" @ VSize(Velocity) * 0.02 * 2.23693629);
-    Canvas.DrawText("m/s  :" @ VSize(Velocity) * 0.02);
+    Canvas.DrawText("UU/s :" @ MySpeed);
+    Canvas.DrawText("km/h :" @ MySpeed * 0.02 * 3.6);
+    Canvas.DrawText("mph  :" @ MySpeed * 0.02 * 2.23693629);
+    Canvas.DrawText("m/s  :" @ MySpeed * 0.02);
     Canvas.DrawText("TotalDrag :" @ VSize(TotalDrag) @ TotalDrag);
     Canvas.DrawText("TotalLift :" @ VSize(TotalLift) @ TotalLift);
+}
+
+function string IntArrayToString(array<int> Arr)
+{
+    local string Str;
+    local int i;
+
+    Str = "[";
+    for (i = 0; i < Arr.Length; ++i)
+    {
+        Str $= Arr[i];
+        if (i < (Arr.Length - 1))
+        {
+            Str $= ",";
+        }
+    }
+    Str $= "]";
+
+    return Str;
 }
 
 simulated event PostRenderFor(
@@ -879,7 +961,7 @@ function bool TryToDriveSeat(Pawn P, optional byte SeatIdx = 255)
     local ROPlayerReplicationInfo ROPRI;
 
     // Does the vehicle need to be uprighted?
-    if ( bIsInverted && bMustBeUpright && VSize(Velocity) <= 5.0f )
+    if ( bIsInverted && bMustBeUpright && MySpeed <= 5.0f )
     {
         if ( bCanFlip )
         {
@@ -949,7 +1031,7 @@ function bool TryToDriveSeat(Pawn P, optional byte SeatIdx = 255)
         return bEnteredVehicle;
     }
 
-    VehicleLocked( P );
+    VehicleLocked(P);
     return false;
 }
 
@@ -996,9 +1078,9 @@ DefaultProperties
     MaxForce=100000 // 250000 // 25000
     MaxTorque=100000 // 250000 // 25000
 
-    PitchControlSensitivity=0.5
-    RollControlSensitivity=0.5
-    YawControlSensitivity=0.5
+    PitchControlSensitivity=1.0
+    RollControlSensitivity=1.0
+    YawControlSensitivity=1.0
 
     bPostRenderIfNotVisible=True
 

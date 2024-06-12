@@ -65,48 +65,16 @@ var(AeroSurfaceDebug) vector CachedLift;
 var(AeroSurfaceDebug) vector CachedDrag;
 var(AeroSurfaceDebug) vector CachedTorque;
 var(AeroSurfaceDebug) vector CachedForce;
+var(AeroSurfaceDebug) vector TempTorque;
+var(AeroSurfaceDebug) vector AeroTorque;
 var(AeroSurfaceDebug) float CachedLiftCoeff;
 var(AeroSurfaceDebug) float CachedDragCoeff;
 var(AeroSurfaceDebug) float CachedTangentialCoeff;
 var(AeroSurfaceDebug) float CachedDynamicPressure;
 var(AeroSurfaceDebug) bool bIsAtStall;
+var(AeroSurfaceDebug) float CachedAngleOfAttack;
 
 var float FlapAngle;
-
-/*
-simulated function vector TransformDirection(matrix TM, vector Direction)
-{
-    return TransformVectorNoScale(TM, Direction);
-}
-
-simulated function vector TransformVectorNoScale(matrix TM, vector Direction)
-{
-    return QuatRotateVector(QuatFromRotator(MatrixGetRotator(TM)), Direction);
-}
-
-simulated function vector InverseTransformDirection(matrix TM, vector Direction)
-{
-    return InverseTransformVectorNoScale(TM, Direction);
-}
-
-simulated function vector InverseTransformVectorNoScale(matrix TM, vector Direction)
-{
-    return VectorQuaternionInverseRotateVector(QuatFromRotator(MatrixGetRotator(TM)), Direction);
-}
-
-simulated function vector VectorQuaternionInverseRotateVector(Quat Q, vector Vec)
-{
-    return QuatRotateVector(VectorQuaternionInverse(Q), Vec);
-}
-
-simulated function Quat VectorQuaternionInverse(Quat Q)
-{
-    Q.X = -Q.X;
-    Q.Y = -Q.Y;
-    Q.Z = -Q.Z;
-    return Q;
-}
-*/
 
 simulated function SetFlapAngle(float Angle)
 {
@@ -124,7 +92,6 @@ simulated function CalculateForces(
     out vector OutForce,
     out vector OutTorque)
 {
-    // local matrix RotMatrix;
     local vector Lift;
     local vector Drag;
     local vector Torque;
@@ -153,15 +120,12 @@ simulated function CalculateForces(
 
     local vector _Discard_Y, _Discard_Z;
 
-    // TODO: something is fucking this up? LifDirection goes from
-    // up to down suddenly for some reason?
-
-    // TODO: some fuckery going on here in the original Unity project?
+    // NOTE: some trickery going on here in the original Unity project.
     //  - The forward vector is not really forward but points to the left
     //    on the reference Cessna aircraft? Why are the aero surfaces rotated 90 deg?
     // GetAxes(GetRotation(), ForwardVector, Y, Z); <-- this should be correct according to all intuition!?
     GetAxes(Owner.Rotation, _Discard_Y, ForwardVector, _Discard_Z); // <-- but let's do this instead...
-    ForwardVector = -ForwardVector; // Yeah...
+    ForwardVector = -ForwardVector; // Also, reverse it to match the reference Cessna setup.
 
     // Accounting for aspect ratio effect on lift coefficient.
     CorrectedLiftSlope = (LiftSlope * AspectRatio
@@ -191,7 +155,7 @@ simulated function CalculateForces(
     // Calculating air velocity relative to the surface's coordinate system.
     AirVelocity = InverseTransformNormal(LocalToWorld, WorldAirVelocity);
     // Ignore the component perpendicular to surface since it only causes skin friction.
-    AirVelocity.Y = 0; // TODO: In unity the Z component is discarded? And in Unreal Y?
+    AirVelocity.Y = 0; // NOTE: In Unity the Z component is discarded, in Unreal Y.
     DragDirection = TransformNormal(LocalToWorld, Normal(AirVelocity));
     LiftDirection = Normal(DragDirection cross ForwardVector);
     DragDirection = Normal(DragDirection);
@@ -203,10 +167,11 @@ simulated function CalculateForces(
     CachedForwardVector = ForwardVector;
 
     Area = Chord * Span;
-    // TODO: are things breaking due to meters/UUs conversions?
-    DynamicPressure = 0.5 * AirDensity * VSizeSq((AirVelocity * UU_TO_METERS));
+    DynamicPressure = 0.5 * AirDensity * VSizeSq(AirVelocity * UU_TO_METERS);
     CachedDynamicPressure = DynamicPressure;
-    LocalAngleOfAttack = ATan2(AirVelocity.Y, -AirVelocity.X);
+    // LocalAngleOfAttack = ATan2(AirVelocity.Y, -AirVelocity.X); // <-- in Unity.
+    LocalAngleOfAttack = ATan2(AirVelocity.Z, -AirVelocity.X);
+    CachedAngleOfAttack = LocalAngleOfAttack;
 
     AerodynamicCoefficients = CalculateCoefficients(
         LocalAngleOfAttack, CorrectedLiftSlope,
@@ -234,7 +199,8 @@ simulated function CalculateForces(
     CachedDrag = Drag;
 
     // TODO: where to do the unit conversions for torque?
-    Torque = (-ForwardVector * AerodynamicCoefficients.Z * DynamicPressure * Area * Chord) * UU_TO_METERS;
+    Torque = (-ForwardVector * AerodynamicCoefficients.Z * DynamicPressure * Area * Chord);
+    AeroTorque = Torque;
     // Torque = ClampLength(Torque, MaxTorque); // TODO: need for safety?
 
     LocalForce = Lift + Drag;
@@ -242,7 +208,8 @@ simulated function CalculateForces(
     CachedForce = LocalForce;
 
     // TODO: where to do the unit conversions for torque?
-    LocalTorque = ((RelativePosition cross LocalForce) /* * UU_TO_METERS */) + Torque;
+    TempTorque = (RelativePosition cross LocalForce) * UU_TO_METERS;
+    LocalTorque = TempTorque + Torque;
     // LocalTorque = ClampLength(LocalTorque, MaxTorque);
     CachedTorque = LocalTorque;
 
