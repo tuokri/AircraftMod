@@ -294,6 +294,7 @@ simulated event Tick(float DeltaTime)
     local rotator ForwardArrowRot;
     local rotator LiftArrowRot;
     local rotator DragArrowRot;
+    local vector ArrowScale3D;
 
     ROPlayerController(GetALocalPlayerController()).myHud.bShowOverlays = True;
     ROPlayerController(GetALocalPlayerController()).myHud.AddPostRenderedActor(self);
@@ -346,13 +347,21 @@ simulated event Tick(float DeltaTime)
         if (!TotalForceDebugArrowComponent.HiddenGame)
         {
             TotalForceDebugArrowComponent.SetAbsolute(false, true);
-            TotalForceDebugArrowComponent.SetRotation(rotator(Velocity));
+            TotalForceDebugArrowComponent.SetRotation(rotator(CachedForce));
+            ArrowScale3D.X = ReScale(VSize(CachedForce), 0.0, MaxForce, 1.0, 10.0);
+            ArrowScale3D.Y = 1;
+            ArrowScale3D.Z = 1;
+            TotalForceDebugArrowComponent.SetScale3D(ArrowScale3D);
         }
 
         if (!VelocityDebugArrowComponent.HiddenGame)
         {
             VelocityDebugArrowComponent.SetAbsolute(false, true);
-            VelocityDebugArrowComponent.SetRotation(rotator(CachedForce));
+            VelocityDebugArrowComponent.SetRotation(rotator(Velocity));
+            ArrowScale3D.X = ReScale(VSize(Velocity), 0.0, MaxSpeed, 1.0, 10.0);
+            ArrowScale3D.Y = 1;
+            ArrowScale3D.Z = 1;
+            VelocityDebugArrowComponent.SetScale3D(ArrowScale3D);
         }
 
         for (i = 0; i < SurfaceDebugArrowAttachments.Length; ++i)
@@ -959,6 +968,16 @@ simulated function BreakRightSkid()
     // Disabled for now.
 }
 
+simulated function float ReScale(
+    float Value,
+    float Min,
+    float Max,
+    optional float NewMin = 0.0,
+    optional float NewMax = 1.0)
+{
+    return (NewMax - NewMin) / (Max - Min) * (Value - Max) + NewMax;
+}
+
 DefaultProperties
 {
     CollectivePitchCurve=(Points=((InVal=0.0,OutVal=0.0),(InVal=1.0,OutVal=1.0)))
@@ -1023,7 +1042,7 @@ DefaultProperties
         BlockNonZeroExtent=false
         bAcceptsDynamicDecals=false
     End Object
-    TotalForceDebugArrowComponent = TotalForceDebugArrow
+    TotalForceDebugArrowComponent=TotalForceDebugArrow
 
     Begin Object class=ROSkeletalMeshComponent name=VelocityDebugArrow
         SkeletalMesh=SkeletalMesh'BirdDog.Mesh.Arrow'
@@ -1039,5 +1058,5 @@ DefaultProperties
         BlockNonZeroExtent=false
         bAcceptsDynamicDecals=false
     End Object
-    VelocityDebugArrowComponent = VelocityDebugArrow
+    VelocityDebugArrowComponent=VelocityDebugArrow
 }
