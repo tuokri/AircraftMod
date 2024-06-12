@@ -10,7 +10,7 @@ of finalizing the implementation and getting it to work on a satisfactory level 
 
 # Issues / TODO
 
-There are currently some issues with the physics, mainly instability and being able to take off.
+There are currently some issues with the physics, mainly instability in flight while rolling.
 These are due to different approaches to handling physics in Unity vs. UE3 among other things.
 
 # License
