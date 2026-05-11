@@ -1,0 +1,25 @@
+`define AM_DEBUG 1
+
+`define amlog(msg, cond, tag) \
+    `log(self.class.name $ "::" $ GetFuncName() $ "(): " $ `msg, \
+    `cond, \
+    `if(`tag) name("AircraftMod-" $ string(`tag)) `else 'AircraftMod' `endif)
+
+`define amslog(msg, cond, tag) \
+    `log(default.class.name $ "::" $ GetFuncName() $ "(): " $ `msg, \
+    `cond, \
+    `if(`tag) name("AircraftMod-" $ string(`tag)) `else 'AircraftMod' `endif)
+
+`define amwarn(msg, cond) `amlog(`msg, `cond, 'WARNING')
+`define amerror(msg, cond) `amlog(`msg, `cond, 'ERROR')
+
+`define amswarn(msg, cond) `amslog(`msg, `cond, 'WARNING')
+`define amserror(msg, cond) `amslog(`msg, `cond, 'ERROR')
+
+`if(`isdefined(AM_DEBUG))
+    `define amdebug(msg, cond) `amlog(`msg, `cond, 'DEBUG')
+    `define amsdebug(msg, cond) `amslog(`msg, `cond, 'DEBUG')
+`else
+    `define amdebug(msg, cond, tag)
+    `define amsdebug(msg, cond, tag)
+`endif

@@ -18,7 +18,7 @@ These are due to different approaches to handling physics in Unity vs. UE3 among
 ```
 MIT License
 
-Copyright (c) 2024 Tuomo Kriikkula
+Copyright (c) 2026 Tuomo Kriikkula
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

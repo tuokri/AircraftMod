@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 Tuomo Kriikkula
+/* Copyright (c) 2026 Tuomo Kriikkula
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -28,9 +28,10 @@ function PreBeginPlay()
 {
     super.PreBeginPlay();
 
-    `log("mutator init");
+    `amlog("mutator init");
 
     ROGameInfo(WorldInfo.Game).PlayerControllerClass = class'AMPlayerController';
 
-    WorldInfo.PhysicsProperties.CompartmentRigidBody.bFixedTimeStep = true;
+    // TODO: what's the real effect of this on our aircraft calcs?
+    // WorldInfo.PhysicsProperties.CompartmentRigidBody.bFixedTimeStep = true;
 }

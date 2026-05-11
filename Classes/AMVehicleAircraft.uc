@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 Tuomo Kriikkula
+/* Copyright (c) 2026 Tuomo Kriikkula
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -181,7 +181,7 @@ simulated function PostBeginPlay()
     super.PostBeginPlay();
 
     MyMass = Mesh.GetRootBodyInstance().GetBodyMass();
-    `log("MyMass = " $ MyMass);
+    `amdebug("MyMass = " $ MyMass);
     // MyMass = 10000; // TODO: Temp.
 
     // Mesh.WakeRigidBody();
@@ -458,7 +458,7 @@ simulated event Tick(float DeltaTime)
         }
     }
 
-    // `log("WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep = " $ WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep,, 'AircraftPhysics');
+    // `amdebug("WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep = " $ WorldInfo.PhysicsProperties.CompartmentRigidBody.TimeStep);
 }
 
 // TODO: more compact drawing for multiple aero surfaces.
@@ -814,8 +814,8 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     CalculateAerodynamicForces(UnrealWorldVelocity, UnrealWorldAngularVelocity,
         /*Vect(0, 0, 0),*/ 1.2f, COMLocation, ForceThisFrame, TorqueThisFrame);
 
-    // `log("UnrealWorldVelocity        = " $ UnrealWorldVelocity,, 'AircraftPhysics');
-    // `log("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity,, 'AircraftPhysics');
+    // `amdebug("UnrealWorldVelocity        = " $ UnrealWorldVelocity);
+    // `amdebug("UnrealWorldAngularVelocity = " $ UnrealWorldAngularVelocity);
 
     // TODO: skipping prediction sub-step for now.
     // PredictedVelocity = PredictVelocity2(ForceThisFrame + ThrustForce, DeltaTime);
@@ -842,15 +842,15 @@ simulated function CalculateLiftTorqueThrust(float DeltaTime)
     CachedForce = CurrentForce;
     CachedTorque = CurrentTorque;
 
-    // `log("*********************************** DeltaTime " $ DeltaTime
-    //     $ " ***********************************",, 'AircraftPhysics');
+    // `amdebug("*********************************** DeltaTime " $ DeltaTime
+    //     $ " ***********************************"');
 
     AddForce(CurrentForce + ThrustForce);
     AddTorque(CurrentTorque);
 
-    // `log("CurrentForce  = " $ CurrentForce,, 'AircraftPhysics');
-    // `log("CurrentTorque = " $ CurrentTorque,, 'AircraftPhysics');
-    // `log("ThrustForce   = " $ ThrustForce,, 'AircraftPhysics');
+    // `amdebug("CurrentForce  = " $ CurrentForce');
+    // `amdebug("CurrentTorque = " $ CurrentTorque');
+    // `amdebug("ThrustForce   = " $ ThrustForce');
 }
 
 simulated function CalculateAerodynamicForces(
@@ -882,9 +882,9 @@ simulated function CalculateAerodynamicForces(
         RelativePos = AeroComp.GetPosition() - CenterOfMass;
         // Mesh.GetSocketWorldLocationAndRotation(AeroComp.AttachmentTargetName, Vec, SocketRot);
 
-        // `log(AeroComp $ ": RelativePos = " $ RelativePos,, 'AircraftPhysics');
-        // `log(name $ ": GetRotation() = " $ AeroComp.GetRotation(),, 'AircraftPhysics');
-        // `log(name $ ": SocketRot     = " $ SocketRot,, 'AircraftPhysics');
+        // `amdebug(AeroComp $ ": RelativePos = " $ RelativePos);
+        // `amdebug(name $ ": GetRotation() = " $ AeroComp.GetRotation());
+        // `amdebug(name $ ": SocketRot     = " $ SocketRot);
 
         AeroComp.CalculateForces(
             -CurrentVelocity /*+ Wind*/ - (CurrentAngularVelocity cross RelativePos),
@@ -928,20 +928,20 @@ simulated function vector PredictAngularVelocity(vector Torque)
     // TODO: since we don't have tensors available in UScript,
     // we have to calculate inertia tensor ourselves?
 
-    // `log("PredictAngularVelocity:Torque = " $ Torque,, 'AircraftPhysics');
+    // `amdebug("PredictAngularVelocity:Torque = " $ Torque);
 
     InertiaTensorWorldRotation = QuatFromRotator(Rotation) + QuatFromRotator(Rotation * 1.5); // + IntertiaTensorRotation??
-    // `log("QuatFromRotator(Rotation).X   = " $ QuatFromRotator(Rotation).X,, 'AircraftPhysics');
-    // `log("QuatFromRotator(Rotation).Y   = " $ QuatFromRotator(Rotation).Y,, 'AircraftPhysics');
-    // `log("QuatFromRotator(Rotation).Z   = " $ QuatFromRotator(Rotation).Z,, 'AircraftPhysics');
-    // `log("QuatFromRotator(Rotation).W   = " $ QuatFromRotator(Rotation).W,, 'AircraftPhysics');
-    // `log("InertiaTensorWorldRotation.X  = " $ InertiaTensorWorldRotation.X,, 'AircraftPhysics');
-    // `log("InertiaTensorWorldRotation.Y  = " $ InertiaTensorWorldRotation.Y,, 'AircraftPhysics');
-    // `log("InertiaTensorWorldRotation.Z  = " $ InertiaTensorWorldRotation.Z,, 'AircraftPhysics');
-    // `log("InertiaTensorWorldRotation.W  = " $ InertiaTensorWorldRotation.W,, 'AircraftPhysics');
+    // `amdebug("QuatFromRotator(Rotation).X   = " $ QuatFromRotator(Rotation).X);
+    // `amdebug("QuatFromRotator(Rotation).Y   = " $ QuatFromRotator(Rotation).Y);
+    // `amdebug("QuatFromRotator(Rotation).Z   = " $ QuatFromRotator(Rotation).Z);
+    // `amdebug("QuatFromRotator(Rotation).W   = " $ QuatFromRotator(Rotation).W);
+    // `amdebug("InertiaTensorWorldRotation.X  = " $ InertiaTensorWorldRotation.X);
+    // `amdebug("InertiaTensorWorldRotation.Y  = " $ InertiaTensorWorldRotation.Y);
+    // `amdebug("InertiaTensorWorldRotation.Z  = " $ InertiaTensorWorldRotation.Z);
+    // `amdebug("InertiaTensorWorldRotation.W  = " $ InertiaTensorWorldRotation.W);
 
     TorqueInDiagonalSpace = QuatRotateVector(QuatInvert(InertiaTensorWorldRotation), Torque);
-    // `log("TorqueInDiagonalSpace         = " $ TorqueInDiagonalSpace,, 'AircraftPhysics');
+    // `amdebug("TorqueInDiagonalSpace         = " $ TorqueInDiagonalSpace);
 
     AngularVelocityChangeInDiagonalSpace.X = TorqueInDiagonalSpace.X / 0.5; // / InertiaTensor.X;
     AngularVelocityChangeInDiagonalSpace.Y = TorqueInDiagonalSpace.Y / 0.5; // / InertiaTensor.Y;

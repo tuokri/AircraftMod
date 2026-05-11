@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 Tuomo Kriikkula
+/* Copyright (c) 2026 Tuomo Kriikkula
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -81,8 +81,8 @@ simulated function SetFlapAngle(float Angle)
     // FlapAngle = FClamp(Angle, DegToRad * -50, DegToRad * 50);
     FlapAngle = FClamp(Angle, -0.8726646259971648, 0.8726646259971648);
 
-    // `log(name $ ": FlapAngle (rad) = " $ FlapAngle,, 'AircraftPhysics');
-    // `log(name $ ": FlapAngle (deg) = " $ FlapAngle * RadToDeg,, 'AircraftPhysics');
+    // `amdebug(name $ ": FlapAngle (rad) = " $ FlapAngle,, 'AircraftPhysics');
+    // `amdebug(name $ ": FlapAngle (deg) = " $ FlapAngle * RadToDeg,, 'AircraftPhysics');
 }
 
 simulated function CalculateForces(
@@ -118,14 +118,10 @@ simulated function CalculateForces(
     local float DynamicPressure;
     local float LocalAngleOfAttack;
 
-    local vector _Discard_Y, _Discard_Z;
+    local vector _Discard_Y;
+    local vector _Discard_Z;
 
-    // NOTE: some trickery going on here in the original Unity project.
-    //  - The forward vector is not really forward but points to the left
-    //    on the reference Cessna aircraft? Why are the aero surfaces rotated 90 deg?
-    // GetAxes(GetRotation(), ForwardVector, Y, Z); <-- this should be correct according to all intuition!?
-    GetAxes(Owner.Rotation, _Discard_Y, ForwardVector, _Discard_Z); // <-- but let's do this instead...
-    ForwardVector = -ForwardVector; // Also, reverse it to match the reference Cessna setup.
+    GetAxes(Rotation, ForwardVector, _Discard_Y, _Discard_Z);
 
     // Accounting for aspect ratio effect on lift coefficient.
     CorrectedLiftSlope = (LiftSlope * AspectRatio
@@ -158,7 +154,7 @@ simulated function CalculateForces(
     AirVelocity.Y = 0; // NOTE: In Unity the Z component is discarded, in Unreal Y.
     DragDirection = TransformNormal(LocalToWorld, Normal(AirVelocity));
     LiftDirection = Normal(DragDirection cross ForwardVector);
-    DragDirection = Normal(DragDirection);
+    // DragDirection = Normal(DragDirection); // ???
 
     // DEBUG ONLY.
     CachedAirVelocity = AirVelocity;
@@ -181,7 +177,7 @@ simulated function CalculateForces(
     CachedDragCoeff = AerodynamicCoefficients.Y;
     CachedTangentialCoeff = AerodynamicCoefficients.Z;
 
-    // `log(
+    // `amgdebug(
     //     name
     //     $ ": FlapAngle = " $ FlapAngle
     //     $ ", Area = " $ Area
@@ -217,7 +213,7 @@ simulated function CalculateForces(
     OutTorque += LocalTorque;
 
     bIsAtStall = !(LocalAngleOfAttack < LocalStallAngleHigh && LocalAngleOfAttack > LocalStallAngleLow);
-    // `log(
+    // `amdebug(
     //     name
     //     $ ": Lift = " $ Lift
     //     $ ", Drag = " $ Drag
@@ -229,8 +225,13 @@ simulated function CalculateForces(
     //     $ ", IsAtStall = " $ bIsAtStall,, 'AircraftPhysics');
 }
 
-simulated function vector CalculateCoefficients(float InAngleOfAttack, float CorrectedLiftSlope,
-    float InZeroLiftAOA, float InStallAngleHigh, float InStallAngleLow)
+simulated function vector CalculateCoefficients(
+    float InAngleOfAttack,
+    float CorrectedLiftSlope,
+    float InZeroLiftAOA,
+    float InStallAngleHigh,
+    float InStallAngleLow
+)
 {
     local vector AerodynamicCoefficients;
     local vector AerodynamicCoefficientsLow;
@@ -252,8 +253,8 @@ simulated function vector CalculateCoefficients(float InAngleOfAttack, float Cor
         || PaddingAngleLow == 0
         || PaddingAngleHigh == 0)
     {
-        `log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "
-            $ "WARNING: ZERO VALUE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",, 'AircraftPhysics');
+        `amerror("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "
+            $ "WARNING: ZERO VALUE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
     if (InAngleOfAttack < InStallAngleHigh && InAngleOfAttack > InStallAngleLow)
@@ -297,8 +298,13 @@ simulated function vector CalculateCoefficients(float InAngleOfAttack, float Cor
     return AerodynamicCoefficients;
 }
 
-simulated function vector CalculateCoefficientsAtStall(float InAngleOfAttack,
-    float CorrectedLiftSlope, float InZeroLiftAOA, float InStallAngleHigh, float InStallAngleLow)
+simulated function vector CalculateCoefficientsAtStall(
+    float InAngleOfAttack,
+    float CorrectedLiftSlope,
+    float InZeroLiftAOA,
+    float InStallAngleHigh,
+    float InStallAngleLow
+)
 {
     local vector Coefficients;
     local float LiftCoefficientLowAOA;
@@ -339,7 +345,7 @@ simulated function vector CalculateCoefficientsAtStall(float InAngleOfAttack,
 
     LiftCoefficient = NormalCoefficient * Cos(EffectiveAngle) - TangentialCoefficient * Sin(EffectiveAngle);
     DragCoefficient = NormalCoefficient * Sin(EffectiveAngle) + TangentialCoefficient * Cos(EffectiveAngle);
-    TorqueCoefficient = -NormalCoefficient * TorqCoefficientProportion(EffectiveAngle);
+    TorqueCoefficient = -NormalCoefficient * TorqueCoefficientProportion(EffectiveAngle);
 
     Coefficients.X = LiftCoefficient;
     Coefficients.Y = DragCoefficient;
@@ -348,8 +354,11 @@ simulated function vector CalculateCoefficientsAtStall(float InAngleOfAttack,
     return Coefficients;
 }
 
-simulated function vector CalculateCoefficientsAtLowAOA(float InAngleOfAttack,
-    float CorrectedLiftSlope, float InZeroLiftAOA)
+simulated function vector CalculateCoefficientsAtLowAOA(
+    float InAngleOfAttack,
+    float CorrectedLiftSlope,
+    float InZeroLiftAOA
+)
 {
     local float LiftCoefficient;
     local float InducedAngle;
@@ -368,7 +377,7 @@ simulated function vector CalculateCoefficientsAtLowAOA(float InAngleOfAttack,
 
     NormalCoefficient = (LiftCoefficient + Sin(EffectiveAngle) * TangentialCoefficient) / Cos(EffectiveAngle);
     DragCoefficient = NormalCoefficient * Sin(EffectiveAngle) + TangentialCoefficient * Cos(EffectiveAngle);
-    TorqueCoefficient = -NormalCoefficient * TorqCoefficientProportion(EffectiveAngle);
+    TorqueCoefficient = -NormalCoefficient * TorqueCoefficientProportion(EffectiveAngle);
 
     Coefficients.X = LiftCoefficient;
     Coefficients.Y = DragCoefficient;
@@ -384,10 +393,10 @@ simulated function float FlapEffectivenessCorrection(float InFlapAngle)
 
 simulated function float LiftCoefficientMaxFraction(float InFlapFraction)
 {
-    return FClamp(0.0, 1.0, 1 - 0.5 * (InFlapFraction - 0.1) / 0.3);
+    return FClamp(1 - 0.5 * (InFlapFraction - 0.1) / 0.3, 0.0, 1.0);
 }
 
-simulated function float TorqCoefficientProportion(float InEffectiveAngle)
+simulated function float TorqueCoefficientProportion(float InEffectiveAngle)
 {
     return 0.25 - 0.175 * (1 - 2 * Abs(InEffectiveAngle) / PI);
 }

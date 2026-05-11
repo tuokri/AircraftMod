@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 Tuomo Kriikkula
+/* Copyright (c) 2026 Tuomo Kriikkula
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -56,13 +56,13 @@ reliable server function ServerSpawnVehicle(string VehicleContentClass)
 
     if (IsZero(HitLoc))
     {
-        `log(self $ " trace failed, using fallback spawn location");
+        `amlog(self $ " trace failed, using fallback spawn location");
         HitLoc = CamLoc + (vector(CamRot) * 250);
     }
 
     HitLoc.Z += 150;
 
-    `log(self $ " attempting to spawn" @ VehicleContentClass @ "at" @ HitLoc);
+    `amlog(self $ " attempting to spawn" @ VehicleContentClass @ "at" @ HitLoc);
     ClientMessage(self $ " attempting to spawn" @ VehicleContentClass @ "at" @ HitLoc);
 
     VehicleClass = class<ROVehicle>(DynamicLoadObject(VehicleContentClass, class'Class'));
@@ -72,7 +72,7 @@ reliable server function ServerSpawnVehicle(string VehicleContentClass)
         ROV.Mesh.AddImpulse(vect(0,0,1), ROV.Location);
         ROV.SetTeamNum(GetTeamNum());
         ClientMessage(self $ " spawned" @ VehicleClass @ ROV @ "at" @ ROV.Location);
-        `log(self $ " spawned" @ VehicleClass @ ROV @ "at" @ ROV.Location);
+        `amlog(self $ " spawned" @ VehicleClass @ ROV @ "at" @ ROV.Location);
     }
 }
 
@@ -104,7 +104,7 @@ reliable server function ServerCamera(name NewMode)
 
     if (PlayerCamera != None)
     {
-        `log("CameraStyle=" $ PlayerCamera.CameraStyle);
+        `amlog("CameraStyle=" $ PlayerCamera.CameraStyle);
         ClientMessage("CameraStyle=" $ PlayerCamera.CameraStyle);
     }
 }
