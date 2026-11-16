@@ -24,6 +24,11 @@ Use the time slider to seek, **Play** to toggle playback, **Rewind** to play
 backwards from the end, and **Speed** to cycle playback rates. The checkbox
 panel independently controls aircraft vectors and each surface marker/vector.
 
+With an interactive Matplotlib backend, use left-drag to rotate the 3D view,
+middle-drag to pan, and right-drag up/down to zoom. The standard 2D toolbar
+pan/zoom buttons do not control `mplot3d`; headless backends such as Agg do not
+provide mouse interaction.
+
 All positions, forces, torques, and velocities are illustrative demo units.
 The prototype uses an X-forward, Y-right, Z-up right-handed display frame; it
 does not yet define the UE3-to-viewer conversion.
