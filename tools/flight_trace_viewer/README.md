@@ -37,6 +37,9 @@ target-machine measurement; see the [detailed results](../../FLIGHT_MODEL_IMPLEM
 Long-trace CSV loading and display compaction are not implemented. The current
 plan favors rendering-only reduction while preserving raw samples for exact
 selection and analysis; see the [long-trace research](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#compacting-long-flight-traces-light-research-not-implemented).
+A nominal two-minute, 60 Hz capture is about 7,200 aircraft rows and 43,200
+surface rows with the current six active surfaces; see the plan for file-size
+assumptions and why this does not imply a need to compact the rendered path.
 
 All positions, forces, torques, and velocities are illustrative demo units.
 The prototype uses an X-forward, Y-right, Z-up right-handed display frame; it
