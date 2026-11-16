@@ -1,0 +1,38 @@
+[project]
+name = "flight-trace-viewer"
+version = "0.1.0"
+description = "Interactive 3D presentation prototype for aircraft flight traces"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.5",
+]
+
+[project.scripts]
+flight_trace_viewer = "flight_trace_viewer.app:main"
+
+[build-system]
+requires = ["uv_build>=0.12.12,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.5",
+    "ty>=0.0.104",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["flight_trace_viewer"]
