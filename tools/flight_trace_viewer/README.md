@@ -34,6 +34,10 @@ and 185 ms for an update followed by a separate camera redraw. That is slower
 than the prototype's nominal 20 FPS cadence, but is not an interactive GUI or
 target-machine measurement; see the [detailed results](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#prototype-performance-smoke-benchmark).
 
+Long-trace CSV loading and display compaction are not implemented. The current
+plan favors rendering-only reduction while preserving raw samples for exact
+selection and analysis; see the [long-trace research](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#compacting-long-flight-traces-light-research-not-implemented).
+
 All positions, forces, torques, and velocities are illustrative demo units.
 The prototype uses an X-forward, Y-right, Z-up right-handed display frame; it
 does not yet define the UE3-to-viewer conversion.
