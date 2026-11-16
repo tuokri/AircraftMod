@@ -11,6 +11,12 @@ dependencies = [
 
 [project.scripts]
 flight_trace_viewer = "flight_trace_viewer.app:main"
+flight_trace_viewer_plotly = "flight_trace_viewer.plotly_renderer:main"
+
+[project.optional-dependencies]
+plotly = [
+    "plotly>=6.3",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.12,<0.13.0"]

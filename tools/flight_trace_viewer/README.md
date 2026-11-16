@@ -14,6 +14,26 @@ From this directory, run:
 uv run flight_trace_viewer
 ```
 
+The early Plotly/WebGL renderer scaffold is optional and can be launched with:
+
+```sh
+uv run --extra plotly flight_trace_viewer_plotly
+```
+
+It draws the synthetic path as a static 3D line and animates the code-drawn
+aircraft glyph in browser-side Plotly frames. Orbit/pan/zoom are provided by
+Plotly. This is not yet feature-parity with the Matplotlib prototype: force and
+torque overlays, surface controls, CSV loading, and a controlled performance
+comparison remain future work. Frame data is preloaded into the browser; use
+`--samples` and `--duration-seconds` to configure the trace (defaults are 320
+poses over 24 seconds), and profile browser load separately from steady-state
+animation. For a nominal two-minute, 60 Hz-sized trace, run
+`uv run --extra plotly flight_trace_viewer_plotly --samples 7200 --duration-seconds 120`.
+Each pose has a precomputed frame;
+slider controls are capped at roughly 500 points while playback includes every
+pose. Large captures may therefore spend noticeable time and memory loading
+the initial figure.
+
 Run tests with:
 
 ```sh
