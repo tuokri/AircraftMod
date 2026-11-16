@@ -1,7 +1,7 @@
 // Lightweight UnrealScript entry points for the aircraft CSV logger.
-// File opening, CSV serialization, buffering, and error handling are not
-// implemented yet; validate FileWriter behavior in the target game first.
-class AMFlightCsvLogger extends Object;
+// FileWriter behavior is based on the UDK-Lite engine source and still needs
+// verification in the target Rising Storm 2 build.
+class AMFlightCsvLogger extends Info;
 
 var private FileWriter AircraftFileWriter;
 var private FileWriter SurfaceFileWriter;
@@ -9,12 +9,13 @@ var private string FlightId;
 var private int TickId;
 var private bool bIsOpen;
 
-simulated function StartSession(
-    string InFlightId,
-    string AircraftCsvPath,
-    string SurfaceCsvPath)
+simulated function bool StartSession(string InFlightId)
 {
-    // TODO: open both text files, write stable headers, then enable logging.
+    // TODO: spawn two FileWriter actors and open unique FWFT_Debug CSV files.
+    // FileWriter.OpenFile() selects a safe engine-managed output directory;
+    // it does not accept an arbitrary destination path.
+    // Disable bFlushEachWrite and emit CSV lines with FileWriter.Logf().
+    return false;
 }
 
 simulated function int BeginTick(float GameTimeSeconds, float DeltaTime)
