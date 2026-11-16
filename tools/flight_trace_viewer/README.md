@@ -34,6 +34,11 @@ slider controls are capped at roughly 500 points while playback includes every
 pose. Large captures may therefore spend noticeable time and memory loading
 the initial figure.
 
+Renderer research treats Plotly/WebGL as a candidate, not a guaranteed 60 FPS
+upgrade. It also summarizes when PyVista/VTK, VisPy, or Open3D might be a better
+fit, and the browser/runtime and static-export tradeoffs; see the
+[renderer comparison](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#other-renderer-options-and-claim-caveats).
+
 Run tests with:
 
 ```sh

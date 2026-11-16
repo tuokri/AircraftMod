@@ -163,6 +163,20 @@ These are CPU-side smoke-test timings, not an interactive GUI or target-machine 
 
 Decision: retain Matplotlib for the lightweight prototype and recorded-trace inspection, but do not assume its current implementation meets smooth real-time playback with camera movement. Benchmark both renderers on the target machine before making a final renderer decision. If maintaining the nominal 20 FPS cadence while moving the camera is required, extend the Plotly scaffold with equivalent overlays and compare browser load time separately from steady-state playback; adopt Dash only if a browser-app layout, linked panels, or web-oriented controls justify the added architecture.
 
+#### Other renderer options and claim caveats
+
+The broad comparison that Plotly is always “vastly faster” or guarantees 60 FPS is too strong. Matplotlib documents `mplot3d` as a 3D-to-2D projection toolkit and notes that it is not the fastest 3D library; Plotly's 3D traces use browser-side WebGL. This makes Plotly a credible performance candidate, not a measured result for this viewer: browser/GPU/driver support, WebGL context limits, figure serialization, and preloaded animation frames all matter. The current headless Matplotlib smoke test found similar timings for 320 and 10,000 path points, so it does not support a universal “few thousand points” cutoff. Neither those Agg results nor generic WebGL claims establish target-machine interactive FPS. See [Matplotlib `mplot3d`](https://matplotlib.org/stable/api/toolkits/mplot3d.html) and [Plotly performance](https://plotly.com/python/performance/).
+
+Do not treat Plotly's depth handling as a blanket guarantee against every overlap, transparency, or ordering artifact; validate the actual aircraft/surface overlays. Matplotlib remains a good option for fixed-camera figures and vector-oriented publication output. Plotly can also export static images, but WebGL layers in SVG/PDF output are raster images rather than true vectors. Interactive Plotly figures require a browser engine (external browser or embedded web view); Kaleido/headless Chrome can produce static images, not browser-free interactive camera controls. See Plotly's [rendering](https://plotly.com/python/renderers/) and [static export](https://plotly.com/python/static-image-export/) guidance.
+
+If Plotly is unsuitable, shortlist alternatives by workload rather than assuming they are drop-in replacements:
+
+- **PyVista/VTK** for richer surface/mesh or volume rendering and a desktop scientific-visualization workflow; it brings a larger framework than this line-and-glyph viewer. See [PyVista](https://docs.pyvista.org/).
+- **VisPy** for a custom, performance-oriented OpenGL visualization where lower-level scene and interaction code is acceptable. See [VisPy](https://vispy.org/vispy.html).
+- **Open3D** if point-cloud or spatial-geometry processing becomes central; it has interactive visualization, but is not an obvious fit for synchronized flight telemetry panels. See [Open3D visualization](https://www.open3d.org/docs/latest/python_example/visualization/).
+
+For the current 7,200-sample path and small number of aerodynamic surfaces, keep the existing Matplotlib and Plotly prototypes as the first comparison. Consider PyVista for a future mesh-heavy aircraft view, or VisPy for proven high-rate custom rendering; do not add either dependency until the matched benchmark shows a need.
+
 #### Compacting long flight traces (light research; not implemented)
 
 The viewer does not load CSVs yet, so there is no real capture-size or display-quality baseline. Treat display decimation separately from storage compression: keep the complete imported rows as the source for exact tick selection, analysis, and export, and create a reduced representation only for rendering. If storage or transfer size is the concern, measure it separately and evaluate lossless compression before considering lossy capture formats. The earlier synthetic benchmark showed similar draw times for 320 and 10,000 path points, so it does not establish that path length alone is a bottleneck; benchmark representative multi-channel captures before choosing a reduction target.
