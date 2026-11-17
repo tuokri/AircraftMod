@@ -1,8 +1,12 @@
 [project]
 name = "flight-trace-viewer"
 version = "0.1.0"
+authors = [
+    {name="Tuomo Kriikkula", email="tuokri@tuta.io"},
+]
 description = "Interactive 3D presentation prototype for aircraft flight traces"
 readme = "README.md"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = [
     "matplotlib>=3.11.2",
