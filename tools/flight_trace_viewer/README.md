@@ -28,7 +28,7 @@ comparison remain future work. Frame data is preloaded into the browser; use
 `--samples` and `--duration-seconds` to configure the trace (defaults are 320
 poses over 24 seconds), and profile browser load separately from steady-state
 animation. For a nominal two-minute, 60 Hz-sized trace, run
-`uv run --extra plotly flight_trace_viewer_plotly --samples 7200 --duration-seconds 120`.
+`uv run --extra plotly flight_trace_viewer_plotly --samples 7200 --duration-seconds 120 --frame-duration-ms 17`.
 Each pose has a precomputed frame;
 slider controls are capped at roughly 500 points while playback includes every
 pose. Large captures may therefore spend noticeable time and memory loading
@@ -38,6 +38,9 @@ Renderer research treats Plotly/WebGL as a candidate, not a guaranteed 60 FPS
 upgrade. It also summarizes when PyVista/VTK, VisPy, or Open3D might be a better
 fit, and the browser/runtime and static-export tradeoffs; see the
 [renderer comparison](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#other-renderer-options-and-claim-caveats).
+The alternatives research finds no matched FPS evidence for this workload and
+notes the Plotly frame-duration caveat: 50 ms across 7,200 frames requests six
+minutes of playback, so use about 17 ms for the 60 Hz example above.
 
 Run tests with:
 
