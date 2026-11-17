@@ -84,7 +84,3 @@ DerivedDataCache/*
 
 # AircraftMod build cache
 .build/
-
-# .NET build artifacts for local tooling
-tools/build/bin/
-tools/build/obj/
