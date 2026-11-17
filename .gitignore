@@ -79,4 +79,8 @@ DerivedDataCache/*
 # Archives
 *.zip
 
+# VS Code workspace files
 *.code-workspace
+
+# AircraftMod build cache
+.build/
