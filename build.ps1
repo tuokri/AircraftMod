@@ -71,7 +71,6 @@ function Write-BuildLog {
         return
     }
 
-    $Message = $Message.Replace(';', ',').Replace([string][char]0x2014, '-')
     $line = '{0}: {1}' -f $Level, $Message
     if (-not $script:NoColor -and $Host.UI.SupportsVirtualTerminal) {
         $colorCode = switch ($Level) {
