@@ -13,6 +13,11 @@ of finalizing the implementation and getting it to work on a satisfactory level 
 There are currently some issues with the physics, mainly instability in flight while rolling.
 These are due to different approaches to handling physics in Unity vs. UE3 among other things.
 
+## Documentation
+
+See [docs/README.md](docs/README.md) for the flight-model plan and tool
+investigation notes.
+
 # License
 
 ```

@@ -37,7 +37,7 @@ the initial figure.
 Renderer research treats Plotly/WebGL as a candidate, not a guaranteed 60 FPS
 upgrade. It also summarizes when PyVista/VTK, VisPy, or Open3D might be a better
 fit, and the browser/runtime and static-export tradeoffs; see the
-[renderer comparison](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#other-renderer-options-and-claim-caveats).
+[renderer comparison](../../docs/FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#other-renderer-options-and-claim-caveats).
 The alternatives research finds no matched FPS evidence for this workload and
 notes the Plotly frame-duration caveat: 50 ms across 7,200 frames requests six
 minutes of playback, so use about 17 ms for the 60 Hz example above.
@@ -60,11 +60,11 @@ provide mouse interaction.
 The local headless Agg smoke benchmark measured about 101 ms per frame update
 and 185 ms for an update followed by a separate camera redraw. That is slower
 than the prototype's nominal 20 FPS cadence, but is not an interactive GUI or
-target-machine measurement; see the [detailed results](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#prototype-performance-smoke-benchmark).
+target-machine measurement; see the [detailed results](../../docs/FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#prototype-performance-smoke-benchmark).
 
 Long-trace CSV loading and display compaction are not implemented. The current
 plan favors rendering-only reduction while preserving raw samples for exact
-selection and analysis; see the [long-trace research](../../FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#compacting-long-flight-traces-light-research-not-implemented).
+selection and analysis; see the [long-trace research](../../docs/FLIGHT_MODEL_IMPLEMENTATION_PLAN.md#compacting-long-flight-traces-light-research-not-implemented).
 A nominal two-minute, 60 Hz capture is about 7,200 aircraft rows and 43,200
 surface rows with the current six active surfaces; see the plan for file-size
 assumptions and why this does not imply a need to compact the rendered path.

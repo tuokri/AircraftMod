@@ -46,6 +46,9 @@ the .NET 10 SDK and run `dotnet format` on that project. Keep the helper's
 `.gitignore` in `tools\build`; do not commit generated binaries. Mod cooking is
 separate future work; no `cook` command exists yet.
 
+See `tools\build\README.md` for the wrapper protocol and
+`docs\VNEDITOR_BINARY_PATCHING_ATTEMPTS.md` for historical patch experiments.
+
 The Python viewer is an isolated project. Run its commands from `tools\flight_trace_viewer`:
 
 ```powershell
@@ -70,7 +73,7 @@ The Plotly renderer is optional. To exercise it, use `uv run --extra plotly pyte
 
 - UnrealScript actor/component setup and aircraft-specific tuning live in `DefaultProperties`; preserve the distinction between declaring a component, attaching it to a mesh/socket, and adding it to the active surface array.
 - In the aircraft tick, force calculation runs before `HandleInputs`. This means newly sampled controls are applied after that tick's force pass; preserve the order unless intentionally changing control timing.
-- Aerodynamic calculations depend on component-local axes, cross-product order, and UE3 units. The current surface calculation projects local airflow by zeroing Y, while the viewer's synthetic display basis is X-forward/Y-right/Z-up and is not a verified UE3 conversion. Verify socket orientation, units, and the current physics API before changing axes or adding conversions; consult `FLIGHT_MODEL_IMPLEMENTATION_PLAN.md` for test rationale, but verify its findings against current code.
+- Aerodynamic calculations depend on component-local axes, cross-product order, and UE3 units. The current surface calculation projects local airflow by zeroing Y, while the viewer's synthetic display basis is X-forward/Y-right/Z-up and is not a verified UE3 conversion. Verify socket orientation, units, and the current physics API before changing axes or adding conversions; consult `docs\FLIGHT_MODEL_IMPLEMENTATION_PLAN.md` for test rationale, but verify its findings against current code.
 - Use the logging macros in `AMMacros.uci` for AircraftMod-tagged messages. When changing code adapted from the Unity aircraft-physics project, retain the applicable notice and consult `ThirdPartyLicenses\LICENSE-Aircraft-Physics`.
 - Keep Python tooling in the viewer subproject. Its Ruff configuration sets a 100-character line length and single-line imports; its tests are under `tests`. Plotly is an optional dependency, separate from the Matplotlib demo.
 
