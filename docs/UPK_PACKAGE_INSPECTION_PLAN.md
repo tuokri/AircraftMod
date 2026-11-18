@@ -48,6 +48,11 @@ not modify or save packages, preview animation, or replace the UE3 editor.
   UObject references or part of the native serialized mesh payload. Confirm
   whether its entries correspond to the visible child socket objects and
   preserve their order.
+- If package parsing alone leaves the loader path or native field layout
+  ambiguous, use the PDB-bearing debug `VNGame.exe` and `UDK.exe` from the
+  local debug depot with Ghidra and x64dbg. Use symbol names and call flows
+  to guide format work, then verify every conclusion against the RS2 package
+  version being targeted.
 - Map the existing UELib deserialization hooks and property-array metadata
   conventions. Choose the supported upstream branch rather than assuming the
   substantially refactored `next` branch is the right base.
@@ -268,6 +273,27 @@ conditions. The BirdDog parser must establish the exact RS2 path before
 implementing a native-tail reader. Do not copy offsets from
 `Unreal/UnObject.cpp`; that file has format-specific fallback offsets for
 property display, not a substitute for parsing the package's property tags.
+
+### Optional binary analysis with Ghidra and x64dbg
+
+The local debug depot contains PDB-bearing `VNGame.exe` and `UDK.exe` builds.
+Use them as analysis aids when UE Explorer/UELib output does not establish how
+RS2 loads or handles a mesh:
+
+- In Ghidra, load the matching PDB and locate the package, skeletal-mesh,
+  socket, and reference-skeleton serialization routines. Follow their calls
+  and data references to understand which fields are tagged properties and
+  which are native serialized payload.
+- In x64dbg, run a controlled local package-load test and trace the relevant
+  deserializer calls and object relationships. Use symbols and function
+  boundaries rather than carrying absolute addresses into the parser.
+- Compare debug `VNGame.exe` and `UDK.exe` behavior where useful. They may
+  differ from the current RS2 build, so use them to form hypotheses and verify
+  the resulting layout against the package version and current executable.
+
+Keep this work read-only: do not patch the executables or package. Do not add
+the debug binaries or PDBs to the repo or to the UELib PR; document the local
+symbol/file needed to reproduce an observation.
 
 ### Proposed UELib types and responsibilities
 
