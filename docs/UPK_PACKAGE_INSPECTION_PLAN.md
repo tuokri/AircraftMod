@@ -111,9 +111,13 @@ possible.
 
 ### 5. Build the AircraftMod inspection CLI
 
-Create a small .NET command-line project that uses the extended UELib. It
-should accept package paths and selected object names, then emit a readable
-summary and JSON suitable for later analysis.
+Create the tool in `tools\upk-inspector` in this repository. Add UELib as a
+Git submodule under `tools\upk-inspector\vendor\Unreal-Library` and reference
+its source project while both codebases are under active development. This
+lets the CLI exercise the exact UELib parser changes in the same checkout
+without moving the tool into UE Explorer or waiting for the UELib PR to merge.
+The CLI should accept package paths and selected object names, then emit a
+readable summary and JSON suitable for later analysis.
 
 The initial report should include:
 
@@ -155,9 +159,14 @@ look like a package-authored value.
 
 ### 6. Prepare and submit the UELib pull request
 
-- Keep the parser/library changes separate from the AircraftMod-specific CLI.
+- Keep the UELib parser changes in the submodule repository and the
+  AircraftMod-specific CLI in `tools\upk-inspector`.
+- Develop the parser on a feature branch in a writable UELib fork, with the
+  official UELib repository as the `upstream` remote. Push the parser commits
+  and open a separate PR to UELib; the AircraftMod repository records the
+  tested UELib commit as its submodule gitlink.
 - Include automated tests, RS2 version notes, supported-field documentation,
-  and clear unsupported-version errors.
+  and clear unsupported-version errors in the UELib PR.
 - Do not include proprietary package files in the PR.
 - Preserve the MIT notices for UEViewer-derived portions and document which
   serialization behavior was adapted.
@@ -462,9 +471,10 @@ a defaulted value look like a package-authored value.
 - Confirm the target branch and preferred design with UELib maintainers before
   large changes. Current `master` is the safer starting point; `next` has a
   major API/stream refactor and an unsupported `UStaticMesh` stub.
-- Keep the UELib parser PR independent of the AircraftMod CLI. The CLI should
-  consume a package/reference to the parser branch while developing, then
-  move to a released UELib package or stable upstream commit.
+- Keep parser source/tests in the UELib submodule and CLI source in
+  `tools\upk-inspector`. The CLI should reference the submodule project while
+  the parser PR is in progress, then keep using a pinned UELib commit after
+  the PR is merged.
 - Include a compatibility note for RS2 versions `765/771`, tested
   licensee/platform variants, compression expectations, supported fields, and
   fields intentionally skipped.
@@ -497,6 +507,48 @@ repository and upstream-library context from conversation history.
   support.
 - `tools\build\README.md`: shows the repository's existing .NET helper layout
   and build conventions; it is not a dependency of the package parser.
+
+The inspection tool belongs in this repository at
+`tools\upk-inspector\`. Its UELib submodule should live at
+`tools\upk-inspector\vendor\Unreal-Library\`, with the CLI project referencing
+`vendor\Unreal-Library\src\Eliot.UELib.csproj`. Target .NET 10 for the CLI and
+the current UELib test project so both can be developed and run together.
+
+Keep the two Git histories distinct:
+
+- The nested UELib repository owns parser source, tests, and its upstream PR.
+- The AircraftMod repository owns the CLI and a pinned submodule commit.
+- The parent repo never stages or commits files from inside the submodule as
+  ordinary files; it records only the submodule commit pointer.
+- BirdDog packages remain local integration-test inputs and are not added to
+  either repository.
+
+The planned project reference in
+`tools\upk-inspector\UpkInspector.csproj` is:
+
+```xml
+<ItemGroup>
+  <ProjectReference Include="vendor\Unreal-Library\src\Eliot.UELib.csproj" />
+</ItemGroup>
+```
+
+For initial setup, add a writable UELib fork as the submodule and retain the
+official repository as a separate remote inside that submodule:
+
+```powershell
+git submodule add https://github.com/<owner>/Unreal-Library.git `
+  tools/upk-inspector/vendor/Unreal-Library
+git -C .\tools\upk-inspector\vendor\Unreal-Library remote add upstream `
+  https://github.com/EliotVU/Unreal-Library.git
+git -C .\tools\upk-inspector\vendor\Unreal-Library fetch upstream
+git -C .\tools\upk-inspector\vendor\Unreal-Library switch -c `
+  feature/rs2-skeletal-mesh upstream/master
+```
+
+Replace `<owner>` with the writable fork owner. Push the feature branch from
+inside the submodule before committing its gitlink in AircraftMod. This ensures
+the parent repository never points at a UELib commit that exists only in a
+local clone.
 
 **UELib**
 
@@ -551,17 +603,22 @@ the UEViewer copyright/license notice when materially adapting code.
 
 ### Start with a baseline and a package probe
 
-Use a clean UELib checkout/worktree separate from AircraftMod's dirty
-UnrealScript worktree. Record the UELib commit and run the existing tests
-before adding parser changes:
+Initialize the nested repository and record both repository revisions before
+making parser changes. Keep the existing AircraftMod UnrealScript edits
+untouched:
 
 ```powershell
-git clone https://github.com/EliotVU/Unreal-Library.git
-Set-Location .\Unreal-Library
-git switch master
-dotnet test .\Test\Eliot.UELib.Test.csproj
-dotnet build .\src\Eliot.UELib.sln
+git submodule update --init --recursive
+git -C .\tools\upk-inspector\vendor\Unreal-Library status --short --branch
+dotnet test .\tools\upk-inspector\vendor\Unreal-Library\Test\Eliot.UELib.Test.csproj
+dotnet build .\tools\upk-inspector\vendor\Unreal-Library\src\Eliot.UELib.sln
 ```
+
+For simultaneous development, create a feature branch inside the submodule
+from the agreed UELib base branch, push it to a writable fork, and add the
+official repository as `upstream`. Do not point the parent submodule URL at an
+unpublished local commit; the gitlink must refer to a commit available from
+the configured submodule remote.
 
 Obtain the local path to `BirdDog.upk` before writing integration tests.
 First use the existing package loader to record the summary/version,
@@ -713,8 +770,9 @@ not check in the game asset.
 
 ### CLI interface sketch
 
-Keep the CLI separate from UELib and make it read-only. A first command shape
-could be:
+Keep the CLI code in `tools\upk-inspector`, consume UELib through the submodule
+project reference, and make the tool read-only. A first command shape could
+be:
 
 ```text
 upk-inspector inspect <package.upk> [--object <reference-path>] [--json]
@@ -737,6 +795,15 @@ Never silently substitute zero for an unsupported or unreadable field. Emit a
 warning with the object path and serialized field, and keep raw package values
 available for debugging. Do not add a 3D rendering dependency.
 
+During development, build and run the tool from the AircraftMod repository
+root:
+
+```powershell
+dotnet build .\tools\upk-inspector\UpkInspector.csproj
+dotnet run --project .\tools\upk-inspector\UpkInspector.csproj -- `
+  inspect <path-to-BirdDog.upk> --json
+```
+
 ### Upstream contribution and PR candidate
 
 Before implementing, check the current upstream contribution guidance and ask
@@ -755,7 +822,9 @@ The first PR candidate should contain:
    skipped, and known limitations;
 5. preserved MIT notices for any adapted UEViewer logic.
 
-Keep the AircraftMod CLI in this repository under `tools\upk-inspector` (or a
-small companion repository) and have it consume the UELib PR/package. This
-keeps package-inspection UX independent from the upstream parser and makes it
-possible to test the parser without building a UE Explorer UI.
+Keep the AircraftMod CLI in this repository under `tools\upk-inspector`; do
+not create a separate companion repository for the initial tool. Its project
+reference should point to the UELib submodule while the parser PR is in
+progress. When the UELib changes are committed and pushed, update the parent
+repository's submodule pointer to that commit so the CLI and parser revisions
+remain reproducible together.
