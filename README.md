@@ -8,17 +8,24 @@ the project work, but it still has a lot of work to do to make it actually playa
 I started this project originally in 2021 and have archived it recently in GitHub in hopes
 of finalizing the implementation and getting it to work on a satisfactory level finally.
 
-# Issues / TODO
+## Issues / TODO
 
 There are currently some issues with the physics, mainly instability in flight while rolling.
 These are due to different approaches to handling physics in Unity vs. UE3 among other things.
+
+- Clean up and rewrite this readme once the project is more mature.
+- Double-check all Span, Chord, etc. values use the correct units! (Meters vs. UUs).
+- Check and fix known bugs/issues from the flight model debugging document!
+- Need to set up the project so that the build script is aware of our binary
+  assets like Blender files and Unreal packages!
+  - Might want to version control these, but also avoid expensive LFS!
 
 ## Documentation
 
 See [docs/README.md](docs/README.md) for the flight-model plan and tool
 investigation notes.
 
-# License
+## License
 
 ```
 MIT License
