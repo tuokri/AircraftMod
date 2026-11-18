@@ -45,6 +45,15 @@ status.
 .\build.ps1 build --release
 #>
 
+[CmdletBinding(SupportsShouldProcess = $true)]
+param(
+    [Parameter(Position = 0)]
+    [string]$Command = '',
+
+    [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
+    [string[]]$CommandArguments = @()
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -55,26 +64,20 @@ $script:ConsoleWrapperVersion = 1
 $script:BuildDirectory = Join-Path $PSScriptRoot '.build'
 $script:CachePath = Join-Path $script:BuildDirectory 'toolchain.json'
 $script:NoColor = -not [string]::IsNullOrEmpty($env:NO_COLOR)
-$script:VerboseLogging = $false
 
 function Write-BuildLog {
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('debug', 'info', 'success', 'warning', 'error')]
+        [ValidateSet('info', 'success', 'warning', 'error')]
         [string]$Level,
 
         [Parameter(Mandatory)]
         [string]$Message
     )
 
-    if ($Level -eq 'debug' -and -not $script:VerboseLogging) {
-        return
-    }
-
     $line = '{0}: {1}' -f $Level, $Message
     if (-not $script:NoColor -and $Host.UI.SupportsVirtualTerminal) {
         $colorCode = switch ($Level) {
-            'debug' { '90' }
             'info' { '36' }
             'success' { '32' }
             'warning' { '33' }
@@ -155,8 +158,12 @@ Options:
   --release           Add -stripsource to the compiler arguments.
   --no-color          Disable colored diagnostics. The NO_COLOR environment
                       variable has the same effect.
-  --dry-run           Skip cache writes and editor launches.
+  --dry-run           Preview cache writes and editor launches without
+                      performing them.
   --verbose           Show diagnostic details such as the editor SHA-256.
+
+PowerShell common parameters are also available: -Verbose, -WhatIf, and
+-Confirm.
 '@
     Write-Output $help
 }
@@ -667,6 +674,7 @@ function Invoke-EditorBuild {
 }
 
 function Invoke-BuildTool {
+    [CmdletBinding(SupportsShouldProcess = $true)]
     param(
         [string]$Command,
         [string[]]$CommandArguments
@@ -693,10 +701,8 @@ function Invoke-BuildTool {
     if ($options.NoColor) {
         $script:NoColor = $true
     }
-    $script:VerboseLogging = $options.Verbose
-    if ($options.DryRun) {
-        Write-BuildLog -Level info -Message 'Dry run requested. No cache or editor process was changed.'
-        return
+    if ($options.Verbose) {
+        $VerbosePreference = 'Continue'
     }
 
     switch ($command) {
@@ -704,8 +710,15 @@ function Invoke-BuildTool {
             $toolchain = Resolve-Toolchain `
                 -EditorPath $options.EditorPath `
                 -SdkSourcePath $options.SdkSourcePath
-            Save-ToolchainCache -Toolchain $toolchain
-            Write-BuildLog -Level success -Message 'Toolchain paths cached.'
+            if ($options.DryRun) {
+                Write-BuildLog -Level info -Message (
+                    "Dry run: would write toolchain cache to '$script:CachePath'."
+                )
+            }
+            elseif ($PSCmdlet.ShouldProcess($script:CachePath, 'Write toolchain cache')) {
+                Save-ToolchainCache -Toolchain $toolchain
+                Write-BuildLog -Level success -Message 'Toolchain paths cached.'
+            }
             Write-BuildLog -Level info -Message "Editor: '$($toolchain.editorPath)'"
             Write-BuildLog -Level info -Message "SDK sources: '$($toolchain.sdkSourcePath)'"
             Write-BuildLog -Level info -Message "Cache: '$script:CachePath'"
@@ -722,7 +735,14 @@ function Invoke-BuildTool {
             else {
                 Write-BuildLog -Level info -Message 'No cache found. Locating the RS2 toolchain.'
                 $toolchain = Resolve-Toolchain
-                Save-ToolchainCache -Toolchain $toolchain
+                if ($options.DryRun) {
+                    Write-BuildLog -Level info -Message (
+                        "Dry run: would write toolchain cache to '$script:CachePath'."
+                    )
+                }
+                elseif ($PSCmdlet.ShouldProcess($script:CachePath, 'Write toolchain cache')) {
+                    Save-ToolchainCache -Toolchain $toolchain
+                }
             }
 
             $userPaths = Get-UserGamePath
@@ -730,12 +750,19 @@ function Invoke-BuildTool {
             Write-BuildLog -Level info -Message "Editor config: '$($userPaths.EditorIniPath)'"
             Write-BuildLog -Level info -Message "Expected script output: '$($userPaths.CompiledScriptPath)'"
             Write-BuildLog -Level info -Message "Editor: '$($toolchain.editorPath)'"
-            Write-BuildLog -Level debug -Message "Editor SHA-256: $($toolchain.editorSha256)"
+            Write-Verbose -Message "Editor SHA-256: $($toolchain.editorSha256)"
 
-            Invoke-EditorBuild `
-                -Toolchain $toolchain `
-                -OutputPath $userPaths.CompiledScriptPath `
-                -Release:$options.Release
+            if ($options.DryRun) {
+                Write-BuildLog -Level info -Message (
+                    "Dry run: would run UnrealScript compilation with '$($toolchain.editorPath)'."
+                )
+            }
+            elseif ($PSCmdlet.ShouldProcess($toolchain.editorPath, 'Run UnrealScript compilation')) {
+                Invoke-EditorBuild `
+                    -Toolchain $toolchain `
+                    -OutputPath $userPaths.CompiledScriptPath `
+                    -Release:$options.Release
+            }
         }
         default {
             throw "Unknown command '$Command'. Run .\build.ps1 help."
@@ -743,17 +770,18 @@ function Invoke-BuildTool {
     }
 }
 
-$command = ''
-$commandArguments = [string[]]@()
-if ($args.Count -gt 0) {
-    $command = [string]$args[0]
-    if ($args.Count -gt 1) {
-        $commandArguments = [string[]]@($args[1..($args.Count - 1)])
-    }
-}
-
 try {
-    Invoke-BuildTool -Command $command -CommandArguments $commandArguments
+    $invokeParameters = @{
+        Command          = $Command
+        CommandArguments = $CommandArguments
+    }
+    foreach ($commonParameter in @('Verbose', 'WhatIf', 'Confirm')) {
+        if ($PSBoundParameters.ContainsKey($commonParameter)) {
+            $invokeParameters[$commonParameter] = $PSBoundParameters[$commonParameter]
+        }
+    }
+
+    Invoke-BuildTool @invokeParameters
 }
 catch {
     Write-BuildLog -Level error -Message $_.Exception.Message
