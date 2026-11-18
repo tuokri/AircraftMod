@@ -148,3 +148,9 @@ These observations apply to the editor hash listed above. Revalidate the pipe
 name, encoding, event behavior, and process lifetime after an editor update.
 The helper does not implement dialog automation, does not patch other editor
 versions, and does not download its executable.
+
+## Development TODOs
+
+- Clean up this readme!
+- Check if the wrapper tool can use more modern and idiomatic C#
+  while keeping the identical functionality!
