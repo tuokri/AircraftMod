@@ -159,6 +159,7 @@ Options:
   --release           Add -stripsource to the compiler arguments.
   --no-color          Disable colored diagnostics. The NO_COLOR environment
                       variable has the same effect.
+  -Verbose            Show diagnostic details such as the editor SHA-256.
   -WhatIf             Preview a build or sync without writing files or
                       launching the editor.
 '@
@@ -725,7 +726,7 @@ function Invoke-BuildTool {
             Write-BuildLog -Level info -Message "Editor config: '$($userPaths.EditorIniPath)'"
             Write-BuildLog -Level info -Message "Expected script output: '$($userPaths.CompiledScriptPath)'"
             Write-BuildLog -Level info -Message "Editor: '$($toolchain.editorPath)'"
-            Write-BuildLog -Level info -Message "Editor SHA-256: $($toolchain.editorSha256)"
+            Write-Verbose -Message "Editor SHA-256: $($toolchain.editorSha256)"
 
             Invoke-EditorBuild `
                 -Toolchain $toolchain `
