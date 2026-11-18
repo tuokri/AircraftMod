@@ -632,7 +632,7 @@ function Invoke-EditorBuild {
     $startInfo.Environment['PATH'] = "$binaryDirectory;$pathVariable"
 
     Write-BuildLog -Level info -Message (
-        "Running '$($Toolchain.editorPath)' through '$wrapperPath' with arguments $($arguments -join ' ')"
+        "Running '$($Toolchain.editorPath)' through '$wrapperPath' with arguments: '$($arguments -join ' ')'"
     )
     $timer = [Diagnostics.Stopwatch]::StartNew()
     $process = [Diagnostics.Process]::Start($startInfo)
