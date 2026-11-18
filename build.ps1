@@ -45,15 +45,6 @@ status.
 .\build.ps1 build --release
 #>
 
-[CmdletBinding(SupportsShouldProcess = $true)]
-param(
-    [Parameter(Position = 0)]
-    [string]$Command = '',
-
-    [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
-    [string[]]$CommandArguments = @()
-)
-
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -64,21 +55,27 @@ $script:ConsoleWrapperVersion = 1
 $script:BuildDirectory = Join-Path $PSScriptRoot '.build'
 $script:CachePath = Join-Path $script:BuildDirectory 'toolchain.json'
 $script:NoColor = -not [string]::IsNullOrEmpty($env:NO_COLOR)
+$script:VerboseLogging = $false
 
 function Write-BuildLog {
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('info', 'success', 'warning', 'error')]
+        [ValidateSet('debug', 'info', 'success', 'warning', 'error')]
         [string]$Level,
 
         [Parameter(Mandatory)]
         [string]$Message
     )
 
+    if ($Level -eq 'debug' -and -not $script:VerboseLogging) {
+        return
+    }
+
     $Message = $Message.Replace(';', ',').Replace([string][char]0x2014, '-')
     $line = '{0}: {1}' -f $Level, $Message
     if (-not $script:NoColor -and $Host.UI.SupportsVirtualTerminal) {
         $colorCode = switch ($Level) {
+            'debug' { '90' }
             'info' { '36' }
             'success' { '32' }
             'warning' { '33' }
@@ -159,9 +156,8 @@ Options:
   --release           Add -stripsource to the compiler arguments.
   --no-color          Disable colored diagnostics. The NO_COLOR environment
                       variable has the same effect.
-  -Verbose            Show diagnostic details such as the editor SHA-256.
-  -WhatIf             Preview a build or sync without writing files or
-                      launching the editor.
+  --dry-run           Skip cache writes and editor launches.
+  --verbose           Show diagnostic details such as the editor SHA-256.
 '@
     Write-Output $help
 }
@@ -556,6 +552,8 @@ function Read-CommandOption {
         SdkSourcePath = $null
         Release       = $false
         NoColor       = $false
+        DryRun        = $false
+        Verbose       = $false
     }
 
     for ($index = 0; $index -lt $Arguments.Count; $index++) {
@@ -579,6 +577,12 @@ function Read-CommandOption {
             }
             '--no-color' {
                 $options.NoColor = $true
+            }
+            '--dry-run' {
+                $options.DryRun = $true
+            }
+            '--verbose' {
+                $options.Verbose = $true
             }
             default {
                 throw "Unknown option: $($Arguments[$index])"
@@ -690,8 +694,9 @@ function Invoke-BuildTool {
     if ($options.NoColor) {
         $script:NoColor = $true
     }
-    if ($WhatIfPreference) {
-        Write-BuildLog -Level info -Message 'WhatIf requested. No cache or editor process was changed.'
+    $script:VerboseLogging = $options.Verbose
+    if ($options.DryRun) {
+        Write-BuildLog -Level info -Message 'Dry run requested. No cache or editor process was changed.'
         return
     }
 
@@ -726,7 +731,7 @@ function Invoke-BuildTool {
             Write-BuildLog -Level info -Message "Editor config: '$($userPaths.EditorIniPath)'"
             Write-BuildLog -Level info -Message "Expected script output: '$($userPaths.CompiledScriptPath)'"
             Write-BuildLog -Level info -Message "Editor: '$($toolchain.editorPath)'"
-            Write-Verbose -Message "Editor SHA-256: $($toolchain.editorSha256)"
+            Write-BuildLog -Level debug -Message "Editor SHA-256: $($toolchain.editorSha256)"
 
             Invoke-EditorBuild `
                 -Toolchain $toolchain `
@@ -739,8 +744,17 @@ function Invoke-BuildTool {
     }
 }
 
+$command = ''
+$commandArguments = [string[]]@()
+if ($args.Count -gt 0) {
+    $command = [string]$args[0]
+    if ($args.Count -gt 1) {
+        $commandArguments = [string[]]@($args[1..($args.Count - 1)])
+    }
+}
+
 try {
-    Invoke-BuildTool -Command $Command -CommandArguments $CommandArguments
+    Invoke-BuildTool -Command $command -CommandArguments $commandArguments
 }
 catch {
     Write-BuildLog -Level error -Message $_.Exception.Message
