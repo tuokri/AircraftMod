@@ -2,7 +2,49 @@
 
 ## Build, test, and lint
 
-The UnrealScript project has no repository-local build script. Project-specific UE3 build instructions are pending; do not guess the SDK version, target, or compile command.
+The UnrealScript toolchain helper is `build.ps1`:
+
+```powershell
+.\build.ps1 help
+.\build.ps1 sync
+.\build.ps1 build
+.\build.ps1 build --release
+```
+
+`sync` discovers the installed RS2 editor and `Development\Src` through Steam,
+then caches their absolute paths in the gitignored `.build\toolchain.json`.
+Inspect the cached SDK source directory for engine/API context. `build` invokes
+the original editor with `make -useunpublished -FORCELOGFLUSH`;
+`--release` adds `-stripsource`. `-FORCELOGFLUSH` flushes each log entry but is
+not used to detect build completion. Before compiling, the tool checks for
+`ModPackages=AircraftMod` under `[ModPackages]` in `ROEditor.ini`, resolved
+from the current user's My Documents directory. The expected script output is
+`Documents\My Games\Rising Storm 2\ROGame\Unpublished\CookedPC\Script\AircraftMod.u`.
+
+The PowerShell entry point owns toolchain discovery, cache/config validation,
+build arguments, and output verification. The .NET 10 console wrapper in
+`tools\build` only handles VNEditor's built-in PID-specific dual-mode named
+pipe: it starts the editor suspended, creates the pipe and matching event,
+then forwards UTF-16 output asynchronously while waiting for pipe closure and
+process exit. It does not patch or replace `VNEditor.exe`, and it does not poll
+logs or process status. Build the helper separately before running `build.ps1`:
+
+```powershell
+dotnet build .\tools\build\VNEditorConsoleWrapper.csproj --configuration Release --output .\.build\VNEditorConsoleWrapper
+```
+
+`build.ps1` only builds UnrealScript code and never runs `dotnet build`.
+
+For PowerShell changes, run `Invoke-ScriptAnalyzer -Path .\build.ps1` and format
+with PSScriptAnalyzer's `Invoke-Formatter`.
+Keep all `Write-BuildLog` messages free of semicolons and em dashes.
+Enclose every file or directory path in a `Write-BuildLog` message in single
+quotes.
+
+For C# wrapper changes, build `tools\build\VNEditorConsoleWrapper.csproj` with
+the .NET 10 SDK and run `dotnet format` on that project. Keep the helper's
+`.gitignore` in `tools\build`; do not commit generated binaries. Mod cooking is
+separate future work; no `cook` command exists yet.
 
 The Python viewer is an isolated project. Run its commands from `tools\flight_trace_viewer`:
 
@@ -34,5 +76,13 @@ The Plotly renderer is optional. To exercise it, use `uv run --extra plotly pyte
 
 ## Copyright notices
 
-Include the MIT license header in all new files created within this repository,
-as seen in existing .uc and .py files.
+Include the MIT license header in new code implementation files such as `.uc`,
+`.py`, `.ps1`, and `.cs`. Do not add license headers to metadata or configuration
+files such as `.gitignore` or `.csproj`.
+
+## Commit messages
+
+Use Conventional Commits for all new commits, in the form
+`<type>[optional scope]: <description>`. Mark breaking changes with `!` and a
+`BREAKING CHANGE:` footer. See
+https://www.conventionalcommits.org/en/v1.0.0-beta.2/.

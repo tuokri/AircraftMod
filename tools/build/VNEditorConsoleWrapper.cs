@@ -144,6 +144,7 @@ internal static class DualModeLauncher
                 initialState: false,
                 EventResetMode.AutoReset,
                 "dualmode_die_event" + started.ProcessId.ToString(CultureInfo.InvariantCulture));
+            // VNEditor signals this event when it closes its output-pipe client.
             _ = outputClosedEvent;
 
             connectionCancellation = new CancellationTokenSource();
@@ -313,7 +314,7 @@ internal static class DualModeLauncher
 
     private static async Task ObservePendingConnectionAsync(Task? connection)
     {
-        if (connection is null || connection.IsCompleted)
+        if (connection is null)
         {
             return;
         }
@@ -344,6 +345,14 @@ internal static class DualModeLauncher
             if (!NativeMethods.TerminateProcess(nativeProcess.DangerousGetHandle(), exitCode: 1))
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to terminate suspended VNEditor.");
+            }
+
+            uint waitResult = NativeMethods.WaitForSingleObject(
+                nativeProcess.DangerousGetHandle(),
+                milliseconds: uint.MaxValue);
+            if (waitResult == uint.MaxValue)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "Failed to wait for suspended VNEditor to exit.");
             }
 
             return;
@@ -439,10 +448,10 @@ internal static class DualModeLauncher
                         colorValue,
                         NumberStyles.HexNumber,
                         CultureInfo.InvariantCulture,
-                        out int colorIndex) &&
-                    (uint)colorIndex < (uint)ColorPalette.Length)
+                        out int colorIndex))
                 {
-                    if (!Console.IsOutputRedirected)
+                    if ((uint)colorIndex < (uint)ColorPalette.Length &&
+                        !Console.IsOutputRedirected)
                     {
                         Console.ForegroundColor = ColorPalette[colorIndex];
                     }
@@ -534,4 +543,7 @@ internal static partial class NativeMethods
     [LibraryImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool TerminateProcess(nint process, uint exitCode);
+
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    internal static partial uint WaitForSingleObject(nint handle, uint milliseconds);
 }
